@@ -26,6 +26,15 @@
             --border: rgba(255, 255, 255, 0.08);
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: white;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg);
@@ -532,6 +541,11 @@
             opacity: 0.3;
         }
 
+        .work-image img.single {
+            opacity: 1;
+            position: relative;
+        }
+
         .work-overlay {
             position: absolute;
             bottom: 0;
@@ -542,6 +556,7 @@
             display: flex;
             gap: 1rem;
             z-index: 10;
+            flex-wrap: wrap;
         }
 
         .tech-tag {
@@ -606,7 +621,7 @@
             color: var(--accent);
         }
 
-        /* Gallery Grid for additional works */
+        /* Gallery Grid */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -789,7 +804,7 @@
             }
             
             .contact-grid {
-                grid-template: 1fr;
+                grid-template-columns: 1fr;
             }
             
             .nav-links {
@@ -799,17 +814,10 @@
             .floating-tag {
                 display: none;
             }
-        }
 
-        /* Smooth scroll */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Selection */
-        ::selection {
-            background: var(--accent);
-            color: white;
+            h2 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -1021,7 +1029,7 @@
                 <!-- Work 2: Props -->
                 <div class="work-card">
                     <div class="work-image">
-                        <img src="Barrel_1.png" alt="Industrial Props" style="opacity: 1;">
+                        <img src="Barrel_1.png" alt="Industrial Props" class="single">
                         <div class="work-overlay">
                             <span class="tech-tag">MODULAR</span>
                             <span class="tech-tag">2K ATLAS</span>
@@ -1048,9 +1056,7 @@
                 <!-- Work 3: Environment -->
                 <div class="work-card">
                     <div class="work-image">
-                        <img src="Home2.png" alt="Environment" style="opacity: 1;">
-                                            <div class="work-image">
-                        <img src="Home2.png" alt="Environment" style="opacity: 1;">
+                        <img src="Home2.png" alt="Environment" class="single">
                         <div class="work-overlay">
                             <span class="tech-tag">UNITY URP</span>
                             <span class="tech-tag">SCENE ASSEMBLY</span>
@@ -1213,7 +1219,7 @@
 
     <footer>
         <div class="container">
-            © 2026 Сергей Войчук • 3D Generalist • Сделано с помощью кофеина и edge loops
+            © 2026 Сергей Войчук • 3D Generalist • Сделано с помощью Kimi AI и edge loops
         </div>
     </footer>
 
