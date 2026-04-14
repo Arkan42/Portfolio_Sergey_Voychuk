@@ -875,6 +875,29 @@
     </div>
 </div>
 
+<!-- New Video Modal -->
+<div class="modal-backdrop" id="modal-video">
+    <div class="modal" style="grid-template-columns: 1fr; max-width: 960px;">
+        <div class="modal-gallery" style="padding: 2rem; background: #000; position: relative;">
+            <button class="modal-close" onclick="closeVideoModal()" style="top: 1.5rem; right: 1.5rem; z-index: 10;">✕</button>
+            
+            <video id="video-player" 
+                   controls 
+                   autoplay 
+                   loop 
+                   muted 
+                   style="width: 100%; max-height: 70vh; border-radius: 16px; background: #111;">
+                <source id="video-source" src="" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+
+            <div style="margin-top: 1rem; text-align: center;">
+                <span id="video-title" style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.05em;"></span>
+            </div>
+        </div>
+    </div>
+</div>    
+    
 <!-- ══════════════ PAGE ══════════════ -->
 
 <nav>
@@ -1169,6 +1192,18 @@
                 <img src="simple_scene.png" alt="Visualization">
                 <div class="gallery-overlay"><div class="gallery-title">Визуализация</div><div class="gallery-desc">Сцена с графиком</div></div>
             </div>
+            <!-- Video Card 1 — Mech Demo -->
+<div class="gallery-item reveal" onclick="openVideoModal('mech_video.mp4', 'mech_video_poster.jpg', 'Combat Mech MK-VII — Subdivision Modeling Demo')">
+    <div style="position: relative; height: 100%; background: #000;">
+        <img src="mech_video_poster.jpg" alt="Mech Video" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
+        <div class="gallery-overlay" style="background: linear-gradient(to top, rgba(5,5,5,0.95), rgba(255,61,0,0.45)); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <div style="font-size: 4.5rem; color: #fff; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(255,61,0,0.6));">▶</div>
+            <div class="gallery-title" style="color: white; text-align: center; font-size: 1.25rem;">Combat Mech Demo</div>
+            <div class="gallery-desc" style="color: rgba(255,255,255,0.9);">Hard Surface • Subdivision • 1:12</div>
+        </div>
+        <div style="position: absolute; top: 16px; right: 16px; background: var(--accent); color: white; font-size: 0.7rem; padding: 4px 10px; border-radius: 9999px; font-family: 'JetBrains Mono'; letter-spacing: 0.5px;">VIDEO</div>
+    </div>
+</div>
             <div class="gallery-item reveal" onclick="openModal('visual_since')">
                 <img src="Geonods.png" alt="Abstraction">
                 <div class="gallery-overlay"><div class="gallery-title">Абстракция</div><div class="gallery-desc">Геоноды</div></div>
@@ -1296,6 +1331,31 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft')  changeImg(id, -1);
     if (e.key === 'ArrowRight') changeImg(id,  1);
 });
+
+// ─── Video Modal Functions ───
+function openVideoModal(videoSrc, posterSrc = '', title = 'Demo Video') {
+    const modal = document.getElementById('modal-video');
+    const video = document.getElementById('video-player');
+    const source = document.getElementById('video-source');
+    const titleEl = document.getElementById('video-title');
+
+    source.src = videoSrc;
+    video.poster = posterSrc;
+    titleEl.textContent = title;
+    video.load();
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeVideoModal() {
+    const modal = document.getElementById('modal-video');
+    const video = document.getElementById('video-player');
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    video.pause();
+    video.currentTime = 0;
+}    
 </script>
 </body>
 </html>
