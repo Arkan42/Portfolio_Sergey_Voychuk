@@ -1404,6 +1404,34 @@ if (mechCardVideo && mechCard) {
 
     cardObserver.observe(mechCard);
 }
+
+// Скрываем кнопку play со всех обычных картинок в Mech
+function hidePlayButtonOnImages() {
+    const mainImg = document.getElementById('mech-main-img');
+    const video = document.getElementById('mech-video');
+    
+    // Убираем play button с картинок
+    if (mainImg) {
+        mainImg.style.setProperty('cursor', 'default', 'important');
+        // Если у тебя есть отдельный элемент кнопки play — можно скрыть его так:
+        const playOverlay = mainImg.parentElement.querySelector('.play-button, .modal-play-icon');
+        if (playOverlay) playOverlay.style.display = 'none';
+    }
+}
+
+// Вызываем при каждой смене слайда
+const originalHandleMechVideo = handleMechVideo;
+handleMechVideo = function(idx) {
+    originalHandleMechVideo(idx);
+    if (idx !== 5) {
+        hidePlayButtonOnImages();
+    }
+};
+
+// Запускаем сразу при открытии
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(hidePlayButtonOnImages, 300);
+});    
 </script>
 </body>
 </html>
