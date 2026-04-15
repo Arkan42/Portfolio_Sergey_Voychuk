@@ -401,6 +401,7 @@
             width: 64px; height: 48px; border-radius: 6px; overflow: hidden;
             border: 2px solid transparent; cursor: pointer; flex-shrink: 0;
             transition: all 0.25s; opacity: 0.55;
+            position: relative; /* ФИКС: удерживает абсолютные дочерние элементы внутри */
         }
         .modal-thumb:hover { opacity: 0.85; }
         .modal-thumb.active { border-color: var(--accent); opacity: 1; }
@@ -518,10 +519,7 @@
             33% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 0); }
             66% { clip-path: inset(85% 0 5% 0); transform: translate(1px, 0); }
         }
-        #mech-gallery img {
-    cursor: default !important;
-}
-
+        /* Убрано: костыль больше не нужен — баг исправлен через position:relative на .modal-thumb */
     </style>
 </head>
 <body>
@@ -936,7 +934,8 @@
         <div class="hero-grid">
             <div class="hero-content reveal">
                 <div class="badge">Готов к выполнению тестового задания</div>
-                <h1><br><span>3D</span> Artist <h2>(Game-ready assets / Marketing visuals)</h2></h1>
+                <h1><span>3D</span> Artist</h1>
+                <p class="hero-description" style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem; margin-top: -0.5rem;">(Game-ready assets / Marketing visuals)</p>
                 <p class="hero-description">
                     Создаю <strong>game-ready ассеты</strong> для real-time проектов (Unity, mobile/PC)
                     Специализация — <strong>Hard Surface</strong>, автомобили,
@@ -1217,7 +1216,7 @@
                 <img src="сетка2.png" alt="Wireframe">
                 <div class="gallery-overlay"><div class="gallery-title">Wireframe</div><div class="gallery-desc">Топология спереди</div></div>
             </div>
-            <div class="gallery-item reveal" onclick="openModal('visual_since')">
+            <div class="gallery-item reveal">
                 <img src="simple_scene.png" alt="Visualization">
                 <div class="gallery-overlay"><div class="gallery-title">Визуализация</div><div class="gallery-desc">Сцена с графиком</div></div>
             </div>
@@ -1233,7 +1232,7 @@
         <div style="position: absolute; top: 16px; right: 16px; background: var(--accent); color: white; font-size: 0.7rem; padding: 4px 10px; border-radius: 9999px; font-family: 'JetBrains Mono'; letter-spacing: 0.5px;">VIDEO</div>
     </div>
 </div>
-            <div class="gallery-item reveal" onclick="openModal('visual_since')">
+            <div class="gallery-item reveal">
                 <img src="Geonods.png" alt="Abstraction">
                 <div class="gallery-overlay"><div class="gallery-title">Абстракция</div><div class="gallery-desc">Геоноды</div></div>
             </div>
@@ -1289,28 +1288,36 @@
 
 <!-- ══════════════ SCRIPTS ══════════════ -->
 <script>
-// ─── Cursor Glow ───
+// ─── Cursor Glow — через RAF, без layout reflow ───
 const glow = document.getElementById('cursorGlow');
+let mx = -9999, my = -9999, gx = -9999, gy = -9999, rafPending = false;
 document.addEventListener('mousemove', e => {
-    glow.style.left = e.clientX + 'px';
-    glow.style.top = e.clientY + 'px';
-});
+    mx = e.clientX; my = e.clientY;
+    if (!rafPending) { rafPending = true; requestAnimationFrame(tickGlow); }
+}, { passive: true });
+function tickGlow() {
+    gx += (mx - gx) * 0.1; gy += (my - gy) * 0.1;
+    glow.style.transform = `translate(calc(${gx | 0}px - 50%), calc(${gy | 0}px - 50%))`;
+    rafPending = (Math.abs(mx - gx) > 0.5 || Math.abs(my - gy) > 0.5);
+    if (rafPending) requestAnimationFrame(tickGlow);
+}
 
-// ─── Scroll Reveal ───
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+// ─── Scroll Reveal — unobserve после срабатывания ───
+const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
+    });
 }, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-// ─── Modal data: images per project ───
+// ─── Modal data ───
 const projectImages = {
-    car: ['1.png','1.1.png','2.png','3.png','4.png','5.png','сетка2.png'],
-    mech: ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png','mech_demo.mp4'],
+    car:     ['1.png','1.1.png','2.png','3.png','4.png','5.png','сетка2.png'],
+    mech:    ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png','mech_demo.mp4'],
     barrels: ['Barrel_1.png','Barrel_2.png','Barrel_3.png','Barrel_4.png','Barrel_5.png','Barrel_6.png'],
-    env: ['Home2.png','Home1.png','Home3.png','Home4.png'],
-    japan: ['japan_1.png','japan_2.png','japan_3.png']
+    env:     ['Home2.png','Home1.png','Home3.png','Home4.png'],
+    japan:   ['japan_1.png','japan_2.png','japan_3.png']
 };
-
 const currentIdx = { car: 0, mech: 0, barrels: 0, env: 0, japan: 0 };
 
 function openModal(id) {
@@ -1318,83 +1325,110 @@ function openModal(id) {
     document.body.style.overflow = 'hidden';
     setImg(id, 0);
 }
-
 function closeModal(id) {
     document.getElementById('modal-' + id).classList.remove('open');
     document.body.style.overflow = '';
+    // Останавливаем видео если было открыто
+    if (id === 'mech') {
+        const v = document.getElementById('mech-video');
+        if (v) { v.pause(); v.currentTime = 0; }
+    }
 }
 
 function setImg(id, idx) {
     const imgs = projectImages[id];
     const i = (idx + imgs.length) % imgs.length;
     currentIdx[id] = i;
-    
-    // Основная смена изображения
-    document.getElementById(id + '-main-img').src = imgs[i];
-    document.getElementById(id + '-count').textContent = (i+1) + ' / ' + imgs.length;
-    
-    // Активный thumbnail
+
+    document.getElementById(id + '-count').textContent = (i + 1) + ' / ' + imgs.length;
     document.querySelectorAll('#' + id + '-thumbs .modal-thumb')
         .forEach((t, ti) => t.classList.toggle('active', ti === i));
 
-    // Специальная обработка для Mech (видео в конце)
     if (id === 'mech') {
-        handleMechVideo(i);
+        handleMechSlide(i);
+    } else {
+        document.getElementById(id + '-main-img').src = imgs[i];
     }
 }
 
-function changeImg(id, dir) {
-    setImg(id, currentIdx[id] + dir);
-}
+function changeImg(id, dir) { setImg(id, currentIdx[id] + dir); }
 
-// Обработка видео в модальном окне Mech
-function handleMechVideo(idx) {
+// ─── Mech: переключение между картинками и видео ───
+function handleMechSlide(idx) {
     const mainImg = document.getElementById('mech-main-img');
-    const video = document.getElementById('mech-video');
-    
-    if (idx === 5) {
-        mainImg.style.display = 'none';
-        video.style.display = 'block';
-        video.play();
+    const video   = document.getElementById('mech-video');
+    const isVideo = (idx === 5);
+
+    mainImg.style.display = isVideo ? 'none' : 'block';
+    video.style.display   = isVideo ? 'block' : 'none';
+
+    if (isVideo) {
+        video.play().catch(() => {}); // autoplay policy catch
     } else {
-        mainImg.style.display = 'block';
-        video.style.display = 'none';
         video.pause();
         video.currentTime = 0;
+        mainImg.src = projectImages.mech[idx];
     }
 }
 
-// Close on backdrop click
+// ─── Video Modal (галерея) ───
+function openVideoModal(videoSrc, posterSrc, title) {
+    const modal  = document.getElementById('modal-video');
+    const video  = document.getElementById('video-player');
+    const source = document.getElementById('video-source');
+    const titleEl = document.getElementById('video-title');
+
+    source.src = videoSrc;
+    if (posterSrc) video.poster = posterSrc;
+    if (titleEl)   titleEl.textContent = title || '';
+    video.load();
+    video.play().catch(() => {});
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeVideoModal() {
+    const modal = document.getElementById('modal-video');
+    const video = document.getElementById('video-player');
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    video.pause();
+    video.currentTime = 0;
+}
+
+// ─── Закрытие по клику на бэкдроп ───
 document.querySelectorAll('.modal-backdrop').forEach(bd => {
     bd.addEventListener('click', e => {
-        if (e.target === bd) closeModal(bd.id.replace('modal-', ''));
+        if (e.target !== bd) return;
+        const id = bd.id.replace('modal-', '');
+        if (id === 'video') closeVideoModal();
+        else closeModal(id);
     });
 });
 
-// Close on Escape + Arrow keys
+// ─── Клавиатура: Escape + стрелки (один listener) ───
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-backdrop.open').forEach(bd => {
-            bd.classList.remove('open');
+            const id = bd.id.replace('modal-', '');
+            if (id === 'video') closeVideoModal();
+            else closeModal(id);
         });
         document.body.style.overflow = '';
+        return;
     }
-});
-
-document.addEventListener('keydown', e => {
-    const open = document.querySelector('.modal-backdrop.open');
+    const open = document.querySelector('.modal-backdrop.open:not(#modal-video)');
     if (!open) return;
     const id = open.id.replace('modal-', '');
-    if (e.key === 'ArrowLeft') changeImg(id, -1);
-    if (e.key === 'ArrowRight') changeImg(id, 1);
+    if (e.key === 'ArrowLeft')  changeImg(id, -1);
+    if (e.key === 'ArrowRight') changeImg(id,  1);
 });
 
-// Автозапуск видео в карточке меха при скролле
+// ─── Автовоспроизведение видео меха при скролле к карточке ───
 const mechCardVideo = document.getElementById('mech-card-video');
-const mechCard = document.getElementById('mech-card');
-
+const mechCard      = document.getElementById('mech-card');
 if (mechCardVideo && mechCard) {
-    const cardObserver = new IntersectionObserver((entries) => {
+    const cardObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 mechCardVideo.style.opacity = '1';
@@ -1405,10 +1439,8 @@ if (mechCardVideo && mechCard) {
             }
         });
     }, { threshold: 0.45 });
-
     cardObserver.observe(mechCard);
 }
-
 </script>
 </body>
 </html>
