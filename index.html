@@ -598,67 +598,142 @@
     </div>
 </div>
 
-<!-- Modal: Mech (с поддержкой видео) -->
+<!-- Modal: Mech -->
+
 <div class="modal-backdrop" id="modal-mech">
+
     <div class="modal">
+
         <div class="modal-gallery">
-            <div class="modal-main-img" id="mech-gallery" style="background:#000;">
-                <span class="modal-img-count" id="mech-count">1 / 6</span>
-                
-                <!-- Изображения -->
-                <img src="meh_2k.png" alt="Combat Mech" id="mech-main-img" class="modal-media active">
-                <img src="meh_1.png" alt="" id="mech-img1" class="modal-media">
-                <img src="meh_2.png" alt="" id="mech-img2" class="modal-media">
-                <img src="meh_3.png" alt="" id="mech-img3" class="modal-media">
-                <img src="meh_4.png" alt="" id="mech-img4" class="modal-media">
 
-                <!-- Видео -->
-                <video id="mech-video" class="modal-media" 
-                       loop muted playsinline 
-                       style="width:100%; height:100%; object-fit:cover; display:none;">
-                    <source src="mech_demo.mp4" type="video/mp4">
-                </video>
+            <div class="modal-main-img" id="mech-gallery">
 
-                <button class="modal-nav-btn modal-prev" onclick="changeMechMedia(-1)">&#8249;</button>
-                <button class="modal-nav-btn modal-next" onclick="changeMechMedia(1)">&#8250;</button>
+                <span class="modal-img-count" id="mech-count">1 / 4</span>
+
+                <img src="meh_2k.png" alt="Mech" id="mech-main-img">
+
+                <button class="modal-nav-btn modal-prev" onclick="changeImg('mech',-1)">&#8249;</button>
+
+                <button class="modal-nav-btn modal-next" onclick="changeImg('mech',1)">&#8250;</button>
+
             </div>
 
             <div class="modal-thumbnails" id="mech-thumbs">
-                <div class="modal-thumb active" onclick="setMechMedia(0)"><img src="meh_2k.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(1)"><img src="meh_1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(2)"><img src="meh_2.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(3)"><img src="meh_3.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(4)"><img src="meh_4.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(5)">
-                    <img src="mech_video_poster.jpg" alt="Video">
-                    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4);">
-                        <span style="font-size:28px; color:white; filter: drop-shadow(0 0 8px black);">▶</span>
-                    </div>
-                </div>
+
+                <div class="modal-thumb active" onclick="setImg('mech',0)"><img src="meh_2k.png" alt=""></div>
+
+                <div class="modal-thumb" onclick="setImg('mech',1)"><img src="meh_1.png" alt=""></div>
+
+                <div class="modal-thumb" onclick="setImg('mech',2)"><img src="meh_2.png" alt=""></div>
+
+                <div class="modal-thumb" onclick="setImg('mech',3)"><img src="meh_3.png" alt=""></div>
+
+                <div class="modal-thumb" onclick="setImg('mech',4)"><img src="meh_4.png" alt=""></div>
+
             </div>
+
         </div>
 
         <div class="modal-info">
+
             <button class="modal-close" onclick="closeModal('mech')">&#215;</button>
-            
-            <!-- Остальной текст остаётся тот же -->
+
             <div>
+
                 <div class="modal-category">Hard Surface / Character Mech</div>
+
                 <div class="modal-title">Combat Mech MK-VII</div>
-            </div>
-            
-            <div class="modal-subtitle">
-                Боевой мех для sci-fi шутера. Модульная конструкция: 5 swap-зон. Vertex color wear masks для уникальных повреждений.
+
             </div>
 
-            <!-- ... (весь остальной контент modal-tags, modal-stats, modal-workflow можно оставить как было) ... -->
+            <div class="modal-subtitle">
+
+                Боевой мех для sci-fi шутера. Конструкция разбита на отдельные элементы (оружие, корпус, детали), что упрощает возможную модульную доработку. Все панели, заклёпки и трубки — отдельные меши с clean topology.
+
+            </div>
+
+            <div class="modal-tags">
+
+                <span class="modal-tag">Blender</span>
+
+                <span class="modal-tag">Hard Surface</span>
+
+                <span class="modal-tag">Substance Painter</span>
+
+                <span class="modal-tag">Modular</span>
+
+                <span class="modal-tag">Sci-Fi</span>
+
+                <span class="modal-tag">2K Atlas</span>
+
+            </div>
+
+            <div class="modal-stats">
+
+                <div class="modal-stat">
+
+                    <div class="modal-stat-label">Tris</div>
+
+                    <div class="modal-stat-value"><span>~38 000</span></div>
+
+                </div>
+
+                <div class="modal-stat">
+
+                    <div class="modal-stat-label">Texture</div>
+
+                    <div class="modal-stat-value"><span>2K</span> Atlas</div>
+
+                </div>
+
+                <div class="modal-stat">
+
+                    <div class="modal-stat-label">Модульность</div>
+
+                    <div class="modal-stat-value"><span>5</span> swap-зон</div>
+
+                </div>
+
+                <div class="modal-stat">
+
+                    <div class="modal-stat-label">Wear layers</div>
+
+                    <div class="modal-stat-value">Vertex <span>paint</span></div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-divider"></div>
+
+            <div class="modal-workflow">
+
+                <div class="modal-workflow-label">// Pipeline</div>
+
+                <div class="modal-step"><div class="modal-step-num">1</div>Силуэт и пропорции меха</div>
+
+                <div class="modal-step"><div class="modal-step-num">2</div>Hard surface детализация панелей</div>
+
+                <div class="modal-step"><div class="modal-step-num">3</div>Boolean workflow для вырезов</div>
+
+                <div class="modal-step"><div class="modal-step-num">4</div>Retopo + модульная система</div>
+
+                <div class="modal-step"><div class="modal-step-num">5</div>2K texture atlas с damage layers</div>
+
+            </div>
 
             <div class="modal-cta">
-                <div class="modal-cta-icon">▶</div>
-                <div>Видео автоматически воспроизводится при переключении на слайд</div>
+
+                <div class="modal-cta-icon">🤖</div>
+
+                <div>Возможна адаптация модели под <em>разные конфигурации</em> за счёт разделения на элементы.</div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
 <!-- Modal: Barrels -->
