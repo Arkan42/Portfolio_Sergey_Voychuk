@@ -612,7 +612,7 @@
                 <img src="meh_3.png" alt="" class="modal-media" id="mech-media-3">
                 <img src="meh_4.png" alt="" class="modal-media" id="mech-media-4">
                 
-                <!-- Видео (последнее в галерее) -->
+                <!-- Видео (6-е по счёту) -->
                 <video id="mech-media-5" class="modal-media" 
                        loop muted playsinline 
                        style="width:100%; height:100%; object-fit:cover; display:none;">
@@ -629,11 +629,10 @@
                 <div class="modal-thumb" onclick="setMechMedia(2)"><img src="meh_2.png" alt=""></div>
                 <div class="modal-thumb" onclick="setMechMedia(3)"><img src="meh_3.png" alt=""></div>
                 <div class="modal-thumb" onclick="setMechMedia(4)"><img src="meh_4.png" alt=""></div>
-                <!-- Миниатюра видео -->
                 <div class="modal-thumb" onclick="setMechMedia(5)">
                     <img src="meh_2k.png" alt="Video">
-                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
-                        <span style="font-size:32px; color:#fff; filter: drop-shadow(0 0 8px #000);">▶</span>
+                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:32px; color:#fff;">▶</span>
                     </div>
                 </div>
             </div>
@@ -1456,38 +1455,36 @@ if (mechCardVideo && mechCard) {
     observer.observe(mechCard);
 }
 
-// Галерея меха с видео
-let currentMech = 0;
-const totalMech = 6;
+// === Галерея Mech с видео ===
+let currentMechIndex = 0;
+const totalMechItems = 6;
 
-function setMechMedia(n) {
-    currentMech = (n + totalMech) % totalMech;
+function setMechMedia(index) {
+    currentMechIndex = (index + totalMechItems) % totalMechItems;
     
-    // Скрываем всё
     document.querySelectorAll('#mech-gallery .modal-media').forEach(el => {
         el.style.display = 'none';
     });
     
-    const media = document.getElementById(`mech-media-${currentMech}`);
+    const media = document.getElementById(`mech-media-${currentMechIndex}`);
     media.style.display = 'block';
     
-    if (currentMech === 5) {
-        media.play();           // автозапуск видео
+    if (currentMechIndex === 5) {
+        media.play();
     } else {
-        document.getElementById('mech-media-5').pause(); // останавливаем видео
+        document.getElementById('mech-media-5').pause();
     }
     
-    document.getElementById('mech-count').textContent = (currentMech + 1) + ' / ' + totalMech;
+    document.getElementById('mech-count').textContent = (currentMechIndex + 1) + ' / ' + totalMechItems;
     
-    // Подсветка миниатюр
     document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === currentMech);
+        t.classList.toggle('active', i === currentMechIndex);
     });
 }
 
 function changeMechMedia(dir) {
-    setMechMedia(currentMech + dir);
-}    
+    setMechMedia(currentMechIndex + dir);
+}   
 </script>
 </body>
 </html>
