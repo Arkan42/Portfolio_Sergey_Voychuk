@@ -1433,36 +1433,39 @@ if (mechCardVideo && mechCard) {
     observer.observe(mechCard);
 }
 
-// === Галерея Mech с видео ===
+// Галерея Mech с видео в конце
 let currentMechIndex = 0;
 const totalMechItems = 6;
 
 function setMechMedia(index) {
     currentMechIndex = (index + totalMechItems) % totalMechItems;
     
+    // Скрываем все медиа
     document.querySelectorAll('#mech-gallery .modal-media').forEach(el => {
         el.style.display = 'none';
     });
     
-    const media = document.getElementById(`mech-media-${currentMechIndex}`);
-    media.style.display = 'block';
+    const currentMedia = document.getElementById(`mech-media-${currentMechIndex}`);
+    currentMedia.style.display = 'block';
     
+    // Автозапуск видео
     if (currentMechIndex === 5) {
-        media.play();
+        currentMedia.play();
     } else {
         document.getElementById('mech-media-5').pause();
     }
     
     document.getElementById('mech-count').textContent = (currentMechIndex + 1) + ' / ' + totalMechItems;
     
-    document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === currentMechIndex);
+    // Активный thumbnail
+    document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === currentMechIndex);
     });
 }
 
-function changeMechMedia(dir) {
-    setMechMedia(currentMechIndex + dir);
-}   
+function changeMechMedia(direction) {
+    setMechMedia(currentMechIndex + direction);
+}
 </script>
 </body>
 </html>
