@@ -924,7 +924,7 @@
             <li><a href="#about">Обо мне</a></li>
             <li><a href="#skills">Навыки</a></li>
             <li><a href="#works">Работы</a></li>
-            <li><a href="#contact">Контакт</a></li>
+            <li><a href="#contact">Контакты</a></li>
         </ul>
     </div>
 </nav>
@@ -1149,6 +1149,14 @@
             <div class="work-card reveal" onclick="openModal('env')">
                 <div class="work-image">
                     <img src="Home2.png" alt="Environment" class="single">
+                    <!-- Видео автозапуск при скролле -->
+        <video id="diorama-card-video" 
+               loop 
+               muted 
+               playsinline 
+               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s; pointer-events: none;">
+            <source src="diorama_demo.mp4" type="video/mp4">
+        </video>
                     <div class="work-overlay">
                         <span class="tech-tag">UNITY URP</span>
                         <span class="tech-tag">SCENE ASSEMBLY</span>
@@ -1425,8 +1433,8 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── Автовоспроизведение видео меха при скролле к карточке ───
-const mechCardVideo = document.getElementById('mech-card-video');
-const mechCard      = document.getElementById('mech-card');
+const mechCardVideo = document.getElementById('mech-card-video','diorama-card-video');
+const mechCard      = document.getElementById('mech-card','diorama-card');
 if (mechCardVideo && mechCard) {
     const cardObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
