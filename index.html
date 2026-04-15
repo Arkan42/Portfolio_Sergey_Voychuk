@@ -518,6 +518,16 @@
             33% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 0); }
             66% { clip-path: inset(85% 0 5% 0); transform: translate(1px, 0); }
         }
+        #mech-gallery img {
+    cursor: default !important;
+}
+
+/* Скрываем любую play-иконку на обычных картинках */
+#mech-gallery img::after,
+#mech-gallery .play-button,
+.modal-main-img .play-icon {
+    display: none !important;
+}
     </style>
 </head>
 <body>
