@@ -520,19 +520,6 @@
             66% { clip-path: inset(85% 0 5% 0); transform: translate(1px, 0); }
         }
         /* Убрано: костыль больше не нужен — баг исправлен через position:relative на .modal-thumb */
-        /* Этот блок отвечает за внешний вид видео в карточках */
-.card-video-preview {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0; /* Видео скрыто, пока мы не навели или не доскроллили */
-    transition: opacity 0.6s ease;
-    pointer-events: none; /* Чтобы клики по карточке работали */
-    z-index: 1;
-}
     </style>
 </head>
 <body>
@@ -937,7 +924,7 @@
             <li><a href="#about">Обо мне</a></li>
             <li><a href="#skills">Навыки</a></li>
             <li><a href="#works">Работы</a></li>
-            <li><a href="#contact">Контакты</a></li>
+            <li><a href="#contact">Контакт</a></li>
         </ul>
     </div>
 </nav>
@@ -1082,7 +1069,11 @@
         <img src="meh_2k.png" alt="Combat Mech" class="rendered">
         
         <!-- Видео автозапуск при скролле -->
-        <video class="card-video-preview" loop muted playsinline>
+        <video id="mech-card-video" 
+               loop 
+               muted 
+               playsinline 
+               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s; pointer-events: none;">
             <source src="mech_demo.mp4" type="video/mp4">
         </video>
 
@@ -1156,12 +1147,8 @@
 
             <!-- Work 5: Environment Diorama -->
             <div class="work-card reveal" onclick="openModal('env')">
-    <div class="work-image">
-        <img src="Home2.png" alt="Environment" class="single">
-        
-        <video class="card-video-preview" loop muted playsinline>
-            <source src="diorama_demo.mp4" type="video/mp4">
-        </video>
+                <div class="work-image">
+                    <img src="Home2.png" alt="Environment" class="single">
                     <div class="work-overlay">
                         <span class="tech-tag">UNITY URP</span>
                         <span class="tech-tag">SCENE ASSEMBLY</span>
@@ -1437,28 +1424,23 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') changeImg(id,  1);
 });
 
-// ─── Универсальное управление видео при скролле ───
-const cardVideoObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        // Ищем видео именно внутри той карточки, до которой доскроллили
-        const video = entry.target.querySelector('.card-video-preview');
-        if (!video) return;
-
-        if (entry.isIntersecting) {
-            video.style.opacity = '1';
-            video.play().catch(() => {}); 
-        } else {
-            video.style.opacity = '0';
-            video.pause();
-        }
-    });
-}, { threshold: 0.45 }); // Видео включится, когда карточка видна почти наполовину
-
-// Применяем это ко всем карточкам, где есть видео-превью
-document.querySelectorAll('.card-video-preview').forEach(video => {
-    const card = video.closest('.work-card');
-    if (card) cardVideoObserver.observe(card);
-});
+// ─── Автовоспроизведение видео меха при скролле к карточке ───
+const mechCardVideo = document.getElementById('mech-card-video');
+const mechCard      = document.getElementById('mech-card');
+if (mechCardVideo && mechCard) {
+    const cardObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                mechCardVideo.style.opacity = '1';
+                mechCardVideo.play().catch(() => {});
+            } else {
+                mechCardVideo.style.opacity = '0';
+                mechCardVideo.pause();
+            }
+        });
+    }, { threshold: 0.45 });
+    cardObserver.observe(mechCard);
+}
 </script>
 </body>
 </html>
