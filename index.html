@@ -609,7 +609,7 @@
                 
                 <img src="meh_2k.png" alt="Mech" id="mech-main-img" style="width:100%; height:100%; object-fit:cover;">
                 
-                <video id="mech-video" loop muted playsinline 
+                <video data-video-slot loop muted playsinline 
                        style="width:100%; height:100%; object-fit:cover; display:none;">
                     <source src="mech_demo.mp4" type="video/mp4">
                 </video>
@@ -1064,12 +1064,12 @@
             </div>
 
             <!-- Work 2: Mech -->
-<div class="work-card reveal" onclick="openModal('mech')" id="mech-card">
+<div class="work-card reveal" onclick="openModal('mech')">
     <div class="work-image">
         <img src="meh_2k.png" alt="Combat Mech" class="rendered">
         
-        <!-- Видео автозапуск при скролле -->
-        <video id="mech-card-video" 
+        <!-- Видео автозапуск при скролле — просто добавь data-card-video в любую .work-card -->
+        <video data-card-video
                loop 
                muted 
                playsinline 
@@ -1149,6 +1149,11 @@
             <div class="work-card reveal" onclick="openModal('env')">
                 <div class="work-image">
                     <img src="Home2.png" alt="Environment" class="single">
+                    <!-- ✅ Хочешь видео при скролле? Раскомментируй и укажи свой файл:
+                    <video data-card-video loop muted playsinline
+                           style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.6s;pointer-events:none;">
+                        <source src="watermill_demo.mp4" type="video/mp4">
+                    </video> -->
                     <div class="work-overlay">
                         <span class="tech-tag">UNITY URP</span>
                         <span class="tech-tag">SCENE ASSEMBLY</span>
@@ -1326,13 +1331,11 @@ function openModal(id) {
     setImg(id, 0);
 }
 function closeModal(id) {
-    document.getElementById('modal-' + id).classList.remove('open');
+    const modal = document.getElementById('modal-' + id);
+    modal.classList.remove('open');
     document.body.style.overflow = '';
-    // Останавливаем видео если было открыто
-    if (id === 'mech') {
-        const v = document.getElementById('mech-video');
-        if (v) { v.pause(); v.currentTime = 0; }
-    }
+    // Универсально останавливаем все видео внутри модалки
+    modal.querySelectorAll('video').forEach(v => { v.pause(); v.currentTime = 0; });
 }
 
 function setImg(id, idx) {
@@ -1344,38 +1347,35 @@ function setImg(id, idx) {
     document.querySelectorAll('#' + id + '-thumbs .modal-thumb')
         .forEach((t, ti) => t.classList.toggle('active', ti === i));
 
-    if (id === 'mech') {
-        handleMechSlide(i);
+    // Универсальная обработка слайдов с видео:
+    // Если у слайда src заканчивается на .mp4 — показываем [data-video-slot],
+    // иначе показываем главную картинку.
+    const mainImg  = document.getElementById(id + '-main-img');
+    const videoEl  = document.querySelector('#modal-' + id + ' [data-video-slot]');
+    const isVideo  = imgs[i] && imgs[i].endsWith('.mp4');
+
+    if (videoEl) {
+        mainImg.style.display = isVideo ? 'none' : 'block';
+        videoEl.style.display = isVideo ? 'block' : 'none';
+        if (isVideo) {
+            videoEl.play().catch(() => {});
+        } else {
+            videoEl.pause();
+            videoEl.currentTime = 0;
+            mainImg.src = imgs[i];
+        }
     } else {
-        document.getElementById(id + '-main-img').src = imgs[i];
+        if (mainImg && !isVideo) mainImg.src = imgs[i];
     }
 }
 
 function changeImg(id, dir) { setImg(id, currentIdx[id] + dir); }
 
-// ─── Mech: переключение между картинками и видео ───
-function handleMechSlide(idx) {
-    const mainImg = document.getElementById('mech-main-img');
-    const video   = document.getElementById('mech-video');
-    const isVideo = (idx === 5);
-
-    mainImg.style.display = isVideo ? 'none' : 'block';
-    video.style.display   = isVideo ? 'block' : 'none';
-
-    if (isVideo) {
-        video.play().catch(() => {}); // autoplay policy catch
-    } else {
-        video.pause();
-        video.currentTime = 0;
-        mainImg.src = projectImages.mech[idx];
-    }
-}
-
 // ─── Video Modal (галерея) ───
 function openVideoModal(videoSrc, posterSrc, title) {
-    const modal  = document.getElementById('modal-video');
-    const video  = document.getElementById('video-player');
-    const source = document.getElementById('video-source');
+    const modal   = document.getElementById('modal-video');
+    const video   = document.getElementById('video-player');
+    const source  = document.getElementById('video-source');
     const titleEl = document.getElementById('video-title');
 
     source.src = videoSrc;
@@ -1424,23 +1424,32 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') changeImg(id,  1);
 });
 
-// ─── Автовоспроизведение видео меха при скролле к карточке ───
-const mechCardVideo = document.getElementById('mech-card-video');
-const mechCard      = document.getElementById('mech-card');
-if (mechCardVideo && mechCard) {
-    const cardObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                mechCardVideo.style.opacity = '1';
-                mechCardVideo.play().catch(() => {});
-            } else {
-                mechCardVideo.style.opacity = '0';
-                mechCardVideo.pause();
-            }
-        });
-    }, { threshold: 0.45 });
-    cardObserver.observe(mechCard);
-}
+// ─── Универсальный автоплей видео при скролле к карточке ───
+// Работает для любой .work-card у которой внутри есть <video data-card-video>
+// Чтобы добавить видео в новую карточку — просто вставь туда этот тег:
+//   <video data-card-video loop muted playsinline style="position:absolute;top:0;left:0;
+//     width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.6s;pointer-events:none;">
+//     <source src="your_video.mp4" type="video/mp4">
+//   </video>
+const cardVideoObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        const video = entry.target.querySelector('[data-card-video]');
+        if (!video) return;
+        if (entry.isIntersecting) {
+            video.style.opacity = '1';
+            video.play().catch(() => {});
+        } else {
+            video.style.opacity = '0';
+            video.pause();
+        }
+    });
+}, { threshold: 0.45 });
+
+document.querySelectorAll('.work-card').forEach(card => {
+    if (card.querySelector('[data-card-video]')) {
+        cardVideoObserver.observe(card);
+    }
+});
 </script>
 </body>
 </html>
