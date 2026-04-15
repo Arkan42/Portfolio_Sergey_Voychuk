@@ -1065,10 +1065,12 @@
     <div class="work-image">
         <img src="meh_2k.png" alt="Combat Mech" class="rendered">
         
-        <!-- Видео, которое автоматически играет при скролле -->
+        <!-- Видео автозапуск при скролле -->
         <video id="mech-card-video" 
-               loop muted playsinline 
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s;">
+               loop 
+               muted 
+               playsinline 
+               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s; pointer-events: none;">
             <source src="mech_demo.mp4" type="video/mp4">
         </video>
 
@@ -1299,7 +1301,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 // ─── Modal data: images per project ───
 const projectImages = {
     car: ['1.png','1.1.png','2.png','3.png','4.png','5.png','сетка2.png'],
-        mech: ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png','mech_demo.mp4'],
+    mech: ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png','mech_demo.mp4'],
     barrels: ['Barrel_1.png','Barrel_2.png','Barrel_3.png','Barrel_4.png','Barrel_5.png','Barrel_6.png'],
     env: ['Home2.png','Home1.png','Home3.png','Home4.png'],
     japan: ['japan_1.png','japan_2.png','japan_3.png']
@@ -1322,14 +1324,40 @@ function setImg(id, idx) {
     const imgs = projectImages[id];
     const i = (idx + imgs.length) % imgs.length;
     currentIdx[id] = i;
+    
+    // Основная смена изображения
     document.getElementById(id + '-main-img').src = imgs[i];
     document.getElementById(id + '-count').textContent = (i+1) + ' / ' + imgs.length;
+    
+    // Активный thumbnail
     document.querySelectorAll('#' + id + '-thumbs .modal-thumb')
         .forEach((t, ti) => t.classList.toggle('active', ti === i));
+
+    // Специальная обработка для Mech (видео в конце)
+    if (id === 'mech') {
+        handleMechVideo(i);
+    }
 }
 
 function changeImg(id, dir) {
     setImg(id, currentIdx[id] + dir);
+}
+
+// Обработка видео в модальном окне Mech
+function handleMechVideo(idx) {
+    const mainImg = document.getElementById('mech-main-img');
+    const video = document.getElementById('mech-video');
+    
+    if (idx === 5) {
+        mainImg.style.display = 'none';
+        video.style.display = 'block';
+        video.play();
+    } else {
+        mainImg.style.display = 'block';
+        video.style.display = 'none';
+        video.pause();
+        video.currentTime = 0;
+    }
 }
 
 // Close on backdrop click
@@ -1339,7 +1367,7 @@ document.querySelectorAll('.modal-backdrop').forEach(bd => {
     });
 });
 
-// Close on Escape
+// Close on Escape + Arrow keys
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-backdrop.open').forEach(bd => {
@@ -1349,7 +1377,6 @@ document.addEventListener('keydown', e => {
     }
 });
 
-// Arrow keys for active modal
 document.addEventListener('keydown', e => {
     const open = document.querySelector('.modal-backdrop.open');
     if (!open) return;
@@ -1358,59 +1385,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') changeImg(id, 1);
 });
 
-// Video Modal Functions (оставляем на будущее)
-function openVideoModal(videoSrc, posterSrc = '', title = 'Demo Video') {
-    const modal = document.getElementById('modal-video');
-    if (!modal) return;
-    const video = document.getElementById('video-player');
-    const source = document.getElementById('video-source');
-    const titleEl = document.getElementById('video-title');
-    source.src = videoSrc;
-    video.poster = posterSrc;
-    titleEl.textContent = title;
-    video.load();
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeVideoModal() {
-    const modal = document.getElementById('modal-video');
-    if (!modal) return;
-    const video = document.getElementById('video-player');
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    video.pause();
-    video.currentTime = 0;
-}
-    
-// Обработка видео в галерее Mech
-function handleMechMedia() {
-    const idx = currentIdx['mech'];
-    const mainImg = document.getElementById('mech-main-img');
-    const video = document.getElementById('mech-video');
-
-    if (idx === 5) {
-        mainImg.style.display = 'none';
-        video.style.display = 'block';
-        video.play();
-    } else {
-        mainImg.style.display = 'block';
-        video.style.display = 'none';
-        video.pause();
-        video.currentTime = 0;
-    }
-}
-
-// Переопределяем setImg для меха
-const originalSetImg = setImg;
-setImg = function(id, idx) {
-    originalSetImg(id, idx);
-    if (id === 'mech') {
-        handleMechMedia();
-    }
-};
-
-// Автозапуск видео в карточке при скролле
+// Автозапуск видео в карточке меха при скролле
 const mechCardVideo = document.getElementById('mech-card-video');
 const mechCard = document.getElementById('mech-card');
 
@@ -1419,40 +1394,16 @@ if (mechCardVideo && mechCard) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 mechCardVideo.style.opacity = '1';
-                mechCardVideo.play();
+                mechCardVideo.play().catch(() => {});
             } else {
                 mechCardVideo.style.opacity = '0';
                 mechCardVideo.pause();
             }
         });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.45 });
 
     cardObserver.observe(mechCard);
 }
-
-// Обработка видео в модальном окне
-function handleMechModalMedia() {
-    const idx = currentIdx['mech'];
-    const mainImg = document.getElementById('mech-main-img');
-    const video = document.getElementById('mech-video');
-
-    if (idx === 5) {
-        mainImg.style.display = 'none';
-        video.style.display = 'block';
-        video.play();
-    } else {
-        mainImg.style.display = 'block';
-        video.style.display = 'none';
-        video.pause();
-        video.currentTime = 0;
-    }
-}
-
-const originalSetImg = setImg;
-setImg = function(id, idx) {
-    originalSetImg(id, idx);
-    if (id === 'mech') handleMechModalMedia();
-};
 </script>
 </body>
 </html>
