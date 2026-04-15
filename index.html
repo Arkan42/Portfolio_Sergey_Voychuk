@@ -759,9 +759,13 @@
 <div class="modal-backdrop" id="modal-env">
     <div class="modal">
         <div class="modal-gallery">
-            <div class="modal-main-img" id="env-gallery">
-                <span class="modal-img-count" id="env-count">1 / 4</span>
-                <img src="Home2.png" alt="Environment" id="env-main-img">
+            <div class="modal-main-img" id="env-gallery" style="background:#000;">
+                <span class="modal-img-count" id="env-count">1 / 5</span>
+                <img src="Home2.png" alt="Environment" id="env-main-img" style="width:100%; height:100%; object-fit:cover;">
+                <video data-video-slot loop muted playsinline
+                       style="width:100%; height:100%; object-fit:cover; display:none;">
+                    <source src="watermill_demo.mp4" type="video/mp4">
+                </video>
                 <button class="modal-nav-btn modal-prev" onclick="changeImg('env',-1)">&#8249;</button>
                 <button class="modal-nav-btn modal-next" onclick="changeImg('env',1)">&#8250;</button>
             </div>
@@ -770,6 +774,12 @@
                 <div class="modal-thumb" onclick="setImg('env',1)"><img src="Home1.png" alt=""></div>
                 <div class="modal-thumb" onclick="setImg('env',2)"><img src="Home3.png" alt=""></div>
                 <div class="modal-thumb" onclick="setImg('env',3)"><img src="Home4.png" alt=""></div>
+                <div class="modal-thumb" onclick="setImg('env',4)">
+                    <img src="Home2.png" alt="">
+                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:32px; color:#fff;">▶</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="modal-info">
@@ -1149,15 +1159,14 @@
             <div class="work-card reveal" onclick="openModal('env')">
                 <div class="work-image">
                     <img src="Home2.png" alt="Environment" class="single">
-                    <!-- ✅ Хочешь видео при скролле? Раскомментируй и укажи свой файл:-->
                     <video data-card-video loop muted playsinline
                            style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.6s;pointer-events:none;">
                         <source src="watermill_demo.mp4" type="video/mp4">
-                    </video> 
+                    </video>
                     <div class="work-overlay">
                         <span class="tech-tag">UNITY URP</span>
                         <span class="tech-tag">SCENE ASSEMBLY</span>
-                        <span class="tech-tag">LIGHTING</span>
+                        <span class="tech-tag">VIDEO DEMO</span>
                     </div>
                 </div>
                 <div class="work-content">
