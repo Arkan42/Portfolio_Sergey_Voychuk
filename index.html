@@ -598,41 +598,34 @@
     </div>
 </div>
 
-<!-- Modal: Mech (с поддержкой видео) -->
+<!-- Modal: Mech -->
 <div class="modal-backdrop" id="modal-mech">
     <div class="modal">
         <div class="modal-gallery">
             <div class="modal-main-img" id="mech-gallery" style="background:#000;">
                 <span class="modal-img-count" id="mech-count">1 / 6</span>
                 
-                <!-- Изображения -->
-                <img src="meh_2k.png" alt="Combat Mech" id="mech-main-img" class="modal-media active">
-                <img src="meh_1.png" alt="" id="mech-img1" class="modal-media">
-                <img src="meh_2.png" alt="" id="mech-img2" class="modal-media">
-                <img src="meh_3.png" alt="" id="mech-img3" class="modal-media">
-                <img src="meh_4.png" alt="" id="mech-img4" class="modal-media">
-
-                <!-- Видео -->
-                <video id="mech-video" class="modal-media" 
-                       loop muted playsinline 
+                <img src="meh_2k.png" alt="Mech" id="mech-main-img" style="width:100%; height:100%; object-fit:cover;">
+                
+                <video id="mech-video" loop muted playsinline 
                        style="width:100%; height:100%; object-fit:cover; display:none;">
                     <source src="mech_demo.mp4" type="video/mp4">
                 </video>
 
-                <button class="modal-nav-btn modal-prev" onclick="changeMechMedia(-1)">&#8249;</button>
-                <button class="modal-nav-btn modal-next" onclick="changeMechMedia(1)">&#8250;</button>
+                <button class="modal-nav-btn modal-prev" onclick="changeImg('mech',-1)">&#8249;</button>
+                <button class="modal-nav-btn modal-next" onclick="changeImg('mech',1)">&#8250;</button>
             </div>
 
             <div class="modal-thumbnails" id="mech-thumbs">
-                <div class="modal-thumb active" onclick="setMechMedia(0)"><img src="meh_2k.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(1)"><img src="meh_1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(2)"><img src="meh_2.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(3)"><img src="meh_3.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(4)"><img src="meh_4.png" alt=""></div>
-                <div class="modal-thumb" onclick="setMechMedia(5)">
-                    <img src="mech_video_poster.jpg" alt="Video">
-                    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4);">
-                        <span style="font-size:28px; color:white; filter: drop-shadow(0 0 8px black);">▶</span>
+                <div class="modal-thumb active" onclick="setImg('mech',0)"><img src="meh_2k.png" alt=""></div>
+                <div class="modal-thumb" onclick="setImg('mech',1)"><img src="meh_1.png" alt=""></div>
+                <div class="modal-thumb" onclick="setImg('mech',2)"><img src="meh_2.png" alt=""></div>
+                <div class="modal-thumb" onclick="setImg('mech',3)"><img src="meh_3.png" alt=""></div>
+                <div class="modal-thumb" onclick="setImg('mech',4)"><img src="meh_4.png" alt=""></div>
+                <div class="modal-thumb" onclick="setImg('mech',5)">
+                    <img src="meh_2k.png" alt="">
+                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:32px; color:#fff;">▶</span>
                     </div>
                 </div>
             </div>
@@ -640,22 +633,51 @@
 
         <div class="modal-info">
             <button class="modal-close" onclick="closeModal('mech')">&#215;</button>
-            
-            <!-- Остальной текст остаётся тот же -->
             <div>
                 <div class="modal-category">Hard Surface / Character Mech</div>
                 <div class="modal-title">Combat Mech MK-VII</div>
             </div>
-            
             <div class="modal-subtitle">
-                Боевой мех для sci-fi шутера. Модульная конструкция: 5 swap-зон. Vertex color wear masks для уникальных повреждений.
+                Боевой мех для sci-fi шутера. Конструкция разбита на отдельные элементы (оружие, корпус, детали), что упрощает возможную модульную доработку. Все панели, заклёпки и трубки — отдельные меши с clean topology.
             </div>
-
-            <!-- ... (весь остальной контент modal-tags, modal-stats, modal-workflow можно оставить как было) ... -->
-
+            <div class="modal-tags">
+                <span class="modal-tag">Blender</span>
+                <span class="modal-tag">Hard Surface</span>
+                <span class="modal-tag">Substance Painter</span>
+                <span class="modal-tag">Modular</span>
+                <span class="modal-tag">Sci-Fi</span>
+                <span class="modal-tag">2K Atlas</span>
+            </div>
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <div class="modal-stat-label">Tris</div>
+                    <div class="modal-stat-value"><span>~38 000</span></div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-label">Texture</div>
+                    <div class="modal-stat-value"><span>2K</span> Atlas</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-label">Модульность</div>
+                    <div class="modal-stat-value"><span>5</span> swap-зон</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-label">Wear layers</div>
+                    <div class="modal-stat-value">Vertex <span>paint</span></div>
+                </div>
+            </div>
+            <div class="modal-divider"></div>
+            <div class="modal-workflow">
+                <div class="modal-workflow-label">// Pipeline</div>
+                <div class="modal-step"><div class="modal-step-num">1</div>Силуэт и пропорции меха</div>
+                <div class="modal-step"><div class="modal-step-num">2</div>Hard surface детализация панелей</div>
+                <div class="modal-step"><div class="modal-step-num">3</div>Boolean workflow для вырезов</div>
+                <div class="modal-step"><div class="modal-step-num">4</div>Retopo + модульная система</div>
+                <div class="modal-step"><div class="modal-step-num">5</div>2K texture atlas с damage layers</div>
+            </div>
             <div class="modal-cta">
-                <div class="modal-cta-icon">▶</div>
-                <div>Видео автоматически воспроизводится при переключении на слайд</div>
+                <div class="modal-cta-icon">🤖</div>
+                <div>Возможна адаптация модели под <em>разные конфигурации</em> за счёт разделения на элементы.</div>
             </div>
         </div>
     </div>
@@ -1041,20 +1063,15 @@
             <!-- Work 2: Mech -->
 <div class="work-card reveal" onclick="openModal('mech')" id="mech-card">
     <div class="work-image">
-        <!-- Основное изображение -->
         <img src="meh_2k.png" alt="Combat Mech" class="rendered">
         
-        <!-- Видео, которое будет играть при скролле -->
+        <!-- Видео, которое автоматически играет при скролле -->
         <video id="mech-card-video" 
-               loop 
-               muted 
-               playsinline 
-               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s;">
+               loop muted playsinline 
+               style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s;">
             <source src="mech_demo.mp4" type="video/mp4">
         </video>
 
-        <img src="meh_2k.png" alt="Combat Mech" class="wireframe"> <!-- оставляем как было -->
-        
         <div class="work-overlay">
             <span class="tech-tag">38K TRIS</span>
             <span class="tech-tag">MODULAR</span>
@@ -1062,7 +1079,6 @@
         </div>
     </div>
     <div class="work-content">
-        <!-- весь текст остаётся как был -->
         <div class="work-category">Hard Surface / Character Mech</div>
         <h3 class="work-title">Combat Mech MK-VII</h3>
         <p class="work-desc">Боевой мех для sci-fi шутера. Модульная конструкция: 5 swap-зон для вариаций без пересборки. Vertex color wear masks для уникальных повреждений.</p>
@@ -1394,47 +1410,49 @@ setImg = function(id, idx) {
     }
 };
 
-// === Mech Media Carousel with Video Autoplay ===
-let currentMechIndex = 0;
-const totalMechMedia = 6; // 5 картинок + 1 видео
+// Автозапуск видео в карточке при скролле
+const mechCardVideo = document.getElementById('mech-card-video');
+const mechCard = document.getElementById('mech-card');
 
-function setMechMedia(index) {
-    currentMechIndex = (index + totalMechMedia) % totalMechMedia;
-    
-    // Скрываем всё
-    document.querySelectorAll('#mech-gallery .modal-media').forEach(el => {
-        el.classList.remove('active');
-        el.style.display = 'none';
-    });
-    
-    // Показываем нужное
-    if (currentMechIndex === 5) {
-        // Видео
-        const video = document.getElementById('mech-video');
-        video.style.display = 'block';
-        video.classList.add('active');
-        video.play();
-    } else {
-        // Картинка
-        const img = document.getElementById(currentMechIndex === 0 ? 'mech-main-img' : `mech-img${currentMechIndex}`);
-        img.style.display = 'block';
-        img.classList.add('active');
-        
-        // Останавливаем видео если оно было
-        document.getElementById('mech-video').pause();
-    }
-    
-    document.getElementById('mech-count').textContent = (currentMechIndex + 1) + ' / ' + totalMechMedia;
-    
-    // Активный thumbnail
-    document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === currentMechIndex);
-    });
+if (mechCardVideo && mechCard) {
+    const cardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                mechCardVideo.style.opacity = '1';
+                mechCardVideo.play();
+            } else {
+                mechCardVideo.style.opacity = '0';
+                mechCardVideo.pause();
+            }
+        });
+    }, { threshold: 0.5 });
+
+    cardObserver.observe(mechCard);
 }
 
-function changeMechMedia(dir) {
-    setMechMedia(currentMechIndex + dir);
-}    
+// Обработка видео в модальном окне
+function handleMechModalMedia() {
+    const idx = currentIdx['mech'];
+    const mainImg = document.getElementById('mech-main-img');
+    const video = document.getElementById('mech-video');
+
+    if (idx === 5) {
+        mainImg.style.display = 'none';
+        video.style.display = 'block';
+        video.play();
+    } else {
+        mainImg.style.display = 'block';
+        video.style.display = 'none';
+        video.pause();
+        video.currentTime = 0;
+    }
+}
+
+const originalSetImg = setImg;
+setImg = function(id, idx) {
+    originalSetImg(id, idx);
+    if (id === 'mech') handleMechModalMedia();
+};
 </script>
 </body>
 </html>
