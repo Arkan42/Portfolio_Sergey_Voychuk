@@ -1278,7 +1278,7 @@
 const glow = document.getElementById('cursorGlow');
 document.addEventListener('mousemove', e => {
     glow.style.left = e.clientX + 'px';
-    glow.style.top  = e.clientY + 'px';
+    glow.style.top = e.clientY + 'px';
 });
 
 // ─── Scroll Reveal ───
@@ -1289,12 +1289,13 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ─── Modal data: images per project ───
 const projectImages = {
-    car:     ['1.png','1.1.png','2.png','3.png','4.png','5.png','сетка2.png'],
-    mech:    ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png'],
+    car: ['1.png','1.1.png','2.png','3.png','4.png','5.png','сетка2.png'],
+    mech: ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png'],
     barrels: ['Barrel_1.png','Barrel_2.png','Barrel_3.png','Barrel_4.png','Barrel_5.png','Barrel_6.png'],
-    env:     ['Home2.png','Home1.png','Home3.png','Home4.png'],
-    japan:   ['japan_1.png','japan_2.png','japan_3.png']
+    env: ['Home2.png','Home1.png','Home3.png','Home4.png'],
+    japan: ['japan_1.png','japan_2.png','japan_3.png']
 };
+
 const currentIdx = { car: 0, mech: 0, barrels: 0, env: 0, japan: 0 };
 
 function openModal(id) {
@@ -1302,6 +1303,7 @@ function openModal(id) {
     document.body.style.overflow = 'hidden';
     setImg(id, 0);
 }
+
 function closeModal(id) {
     document.getElementById('modal-' + id).classList.remove('open');
     document.body.style.overflow = '';
@@ -1316,6 +1318,7 @@ function setImg(id, idx) {
     document.querySelectorAll('#' + id + '-thumbs .modal-thumb')
         .forEach((t, ti) => t.classList.toggle('active', ti === i));
 }
+
 function changeImg(id, dir) {
     setImg(id, currentIdx[id] + dir);
 }
@@ -1342,127 +1345,35 @@ document.addEventListener('keydown', e => {
     const open = document.querySelector('.modal-backdrop.open');
     if (!open) return;
     const id = open.id.replace('modal-', '');
-    if (e.key === 'ArrowLeft')  changeImg(id, -1);
-    if (e.key === 'ArrowRight') changeImg(id,  1);
+    if (e.key === 'ArrowLeft') changeImg(id, -1);
+    if (e.key === 'ArrowRight') changeImg(id, 1);
 });
 
-// ─── Video Modal Functions ───
+// Video Modal Functions (оставляем на будущее)
 function openVideoModal(videoSrc, posterSrc = '', title = 'Demo Video') {
     const modal = document.getElementById('modal-video');
+    if (!modal) return;
     const video = document.getElementById('video-player');
     const source = document.getElementById('video-source');
     const titleEl = document.getElementById('video-title');
-
     source.src = videoSrc;
     video.poster = posterSrc;
     titleEl.textContent = title;
     video.load();
-
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
 }
 
 function closeVideoModal() {
     const modal = document.getElementById('modal-video');
+    if (!modal) return;
     const video = document.getElementById('video-player');
     modal.classList.remove('open');
     document.body.style.overflow = '';
     video.pause();
     video.currentTime = 0;
 }
-
-    // === Mech Media Carousel with Video Autoplay ===
-let currentMechIndex = 0;
-const totalMechMedia = 6; // 5 картинок + 1 видео
-
-function setMechMedia(index) {
-    currentMechIndex = (index + totalMechMedia) % totalMechMedia;
-    
-    // Скрываем всё
-    document.querySelectorAll('#mech-gallery .modal-media').forEach(el => {
-        el.classList.remove('active');
-        el.style.display = 'none';
-    });
-    
-    // Показываем нужное
-    if (currentMechIndex === 5) {
-        // Видео
-        const video = document.getElementById('mech-video');
-        video.style.display = 'block';
-        video.classList.add('active');
-        video.play();
-    } else {
-        // Картинка
-        const img = document.getElementById(currentMechIndex === 0 ? 'mech-main-img' : `mech-img${currentMechIndex}`);
-        img.style.display = 'block';
-        img.classList.add('active');
-        
-        // Останавливаем видео если оно было
-        document.getElementById('mech-video').pause();
-    }
-    
-    document.getElementById('mech-count').textContent = (currentMechIndex + 1) + ' / ' + totalMechMedia;
-    
-    // Активный thumbnail
-    document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === currentMechIndex);
-    });
-}
-
-function changeMechMedia(dir) {
-    setMechMedia(currentMechIndex + dir);
-}
-
-// Автозапуск видео в карточке меха при скролле
-const mechCardVideo = document.getElementById('mech-card-video');
-const mechCard = document.getElementById('mech-card');
-
-if (mechCardVideo && mechCard) {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                mechCardVideo.style.opacity = '1';
-                mechCardVideo.play();
-            } else {
-                mechCardVideo.style.opacity = '0';
-                mechCardVideo.pause();
-            }
-        });
-    }, { threshold: 0.6 });
-
-    observer.observe(mechCard);
-}
-
-// === Галерея Mech с видео ===
-let currentMechIndex = 0;
-const totalMechItems = 6;
-
-function setMechMedia(index) {
-    currentMechIndex = (index + totalMechItems) % totalMechItems;
-    
-    document.querySelectorAll('#mech-gallery .modal-media').forEach(el => {
-        el.style.display = 'none';
-    });
-    
-    const media = document.getElementById(`mech-media-${currentMechIndex}`);
-    media.style.display = 'block';
-    
-    if (currentMechIndex === 5) {
-        media.play();
-    } else {
-        document.getElementById('mech-media-5').pause();
-    }
-    
-    document.getElementById('mech-count').textContent = (currentMechIndex + 1) + ' / ' + totalMechItems;
-    
-    document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === currentMechIndex);
-    });
-}
-
-function changeMechMedia(dir) {
-    setMechMedia(currentMechIndex + dir);
-}
+</script>
 </script>
 </body>
 </html>
