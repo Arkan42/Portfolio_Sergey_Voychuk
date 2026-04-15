@@ -6,1466 +6,983 @@
     <title>Сергей Войчук — 3D Generalist</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --bg: #050505;
-            --surface: rgba(255, 255, 255, 0.03);
-            --surface-solid: #0f0f0f;
-            --accent: #ff3d00;
-            --accent-glow: rgba(255, 61, 0, 0.4);
-            --secondary: #00e5ff;
-            --text: #fafafa;
-            --text-muted: rgba(255, 255, 255, 0.5);
-            --border: rgba(255, 255, 255, 0.08);
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#050505;--surface:rgba(255,255,255,0.03);--surface-solid:#0f0f0f;
+            --accent:#ff3d00;--accent-glow:rgba(255,61,0,0.4);--secondary:#00e5ff;
+            --text:#fafafa;--text-muted:rgba(255,255,255,0.5);--border:rgba(255,255,255,0.08);
         }
-
-        html { scroll-behavior: smooth; }
-
-        ::selection { background: var(--accent); color: white; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
+        html{scroll-behavior:smooth}
+        ::selection{background:var(--accent);color:#fff}
+        body{
+            font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+            line-height:1.6;overflow-x:hidden;
             background-image:
-                radial-gradient(circle at 20% 30%, rgba(255, 61, 0, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(0, 229, 255, 0.08) 0%, transparent 40%);
+                radial-gradient(circle at 20% 30%,rgba(255,61,0,.15) 0%,transparent 40%),
+                radial-gradient(circle at 80% 70%,rgba(0,229,255,.08) 0%,transparent 40%);
         }
 
-        /* ── CURSOR GLOW ── */
-        .cursor-glow {
-            position: fixed;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,61,0,0.07) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            transition: opacity 0.3s;
+        /* CURSOR GLOW — GPU composited, no layout thrash */
+        .cursor-glow{
+            position:fixed;width:400px;height:400px;border-radius:50%;
+            background:radial-gradient(circle,rgba(255,61,0,.07) 0%,transparent 70%);
+            pointer-events:none;z-index:9999;
+            transform:translate3d(-9999px,-9999px,0);
+            will-change:transform;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .container{max-width:1200px;margin:0 auto;padding:0 2rem}
 
-        /* ── NAV ── */
-        nav {
-            position: fixed; top: 0; width: 100%; z-index: 100;
-            backdrop-filter: blur(20px);
-            background: rgba(5, 5, 5, 0.8);
-            border-bottom: 1px solid var(--border);
+        /* NAV */
+        nav{
+            position:fixed;top:0;width:100%;z-index:200;
+            backdrop-filter:blur(20px);background:rgba(5,5,5,.8);
+            border-bottom:1px solid var(--border);
         }
-        nav .container { display: flex; justify-content: space-between; align-items: center; height: 80px; }
-        .logo {
-            font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.2rem;
-            color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
-        }
-        .logo::before {
-            content: ''; width: 8px; height: 8px; background: var(--accent);
-            border-radius: 2px; box-shadow: 0 0 10px var(--accent-glow);
-        }
-        .nav-links { display: flex; gap: 3rem; list-style: none; }
-        .nav-links a {
-            color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
-            font-weight: 500; transition: color 0.3s; position: relative;
-        }
-        .nav-links a:hover { color: var(--text); }
-        .nav-links a::after {
-            content: ''; position: absolute; bottom: -4px; left: 0;
-            width: 0; height: 2px; background: var(--accent); transition: width 0.3s;
-        }
-        .nav-links a:hover::after { width: 100%; }
+        nav .container{display:flex;justify-content:space-between;align-items:center;height:80px}
+        .logo{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.2rem;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:.5rem}
+        .logo::before{content:'';width:8px;height:8px;background:var(--accent);border-radius:2px;box-shadow:0 0 10px var(--accent-glow)}
+        .nav-links{display:flex;gap:3rem;list-style:none}
+        .nav-links a{color:var(--text-muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .3s;position:relative}
+        .nav-links a:hover{color:var(--text)}
+        .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);transition:width .3s}
+        .nav-links a:hover::after{width:100%}
 
-        /* ── HERO ── */
-        .hero {
-            min-height: 100vh; display: flex; align-items: center;
-            padding-top: 80px; position: relative;
-        }
-        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-        .hero-content { position: relative; z-index: 2; }
+        /* HERO */
+        .hero{min-height:100vh;display:flex;align-items:center;padding-top:80px;position:relative}
+        .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+        .hero-content{position:relative;z-index:2}
+        .badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--secondary);margin-bottom:2rem;backdrop-filter:blur(10px)}
+        .badge::before{content:'';width:6px;height:6px;background:var(--secondary);border-radius:50%;box-shadow:0 0 8px var(--secondary);animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+        .hero h1{font-size:clamp(3rem,6vw,5rem);margin-bottom:1.5rem;font-weight:900;line-height:.9;letter-spacing:-.02em}
+        .hero h1 span{color:transparent;-webkit-text-stroke:2px var(--accent);position:relative}
+        .hero h1 span::after{content:'3D';position:absolute;left:4px;top:4px;-webkit-text-stroke:0;color:var(--accent);opacity:.3;z-index:-1}
+        .hero-description{font-size:1.25rem;color:var(--text-muted);max-width:500px;margin-bottom:2.5rem;line-height:1.7}
+        .hero-description strong{color:var(--text);font-weight:600}
+        .cta-group{display:flex;gap:1rem;flex-wrap:wrap}
+        .btn{padding:1rem 2rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;text-decoration:none;border-radius:4px;transition:all .3s;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:.5rem}
+        .btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 20px var(--accent-glow)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px var(--accent-glow)}
+        .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+        .btn-secondary:hover{border-color:var(--secondary);color:var(--secondary);background:rgba(0,229,255,.05)}
+        .hero-visual{position:relative;height:600px;display:flex;align-items:center;justify-content:center}
+        .hero-image-wrapper{position:relative;width:100%;height:100%;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .hero-image-wrapper img{width:100%;height:100%;object-fit:cover;opacity:.95}
+        .hero-image-wrapper::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,5,.6),transparent 40%);z-index:1;pointer-events:none}
+        .floating-tag{position:absolute;background:rgba(15,15,15,.9);backdrop-filter:blur(10px);padding:.75rem 1.25rem;border:1px solid var(--border);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text);z-index:10;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+        .tag-1{top:20%;left:-20px}.tag-2{bottom:30%;right:-20px;color:var(--accent)}.tag-3{bottom:10%;left:10%;color:var(--secondary)}
 
-        .badge {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.5rem 1rem; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 100px;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
-            color: var(--secondary); margin-bottom: 2rem; backdrop-filter: blur(10px);
-        }
-        .badge::before {
-            content: ''; width: 6px; height: 6px; background: var(--secondary);
-            border-radius: 50%; box-shadow: 0 0 8px var(--secondary); animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        /* SECTIONS */
+        section{padding:8rem 0;position:relative}
+        section:not(.hero){content-visibility:auto;contain-intrinsic-size:0 600px}
+        .section-header{margin-bottom:4rem;display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:2rem}
+        .section-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);text-transform:uppercase;letter-spacing:.2em;margin-bottom:1rem;display:block}
+        h2{font-size:2.5rem;max-width:600px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
 
-        .hero h1 {
-            font-size: clamp(3rem, 6vw, 5rem); margin-bottom: 1.5rem;
-            font-weight: 900; line-height: 0.9; letter-spacing: -0.02em;
-        }
-        .hero h1 span {
-            color: transparent; -webkit-text-stroke: 2px var(--accent); position: relative;
-        }
-        .hero h1 span::after {
-            content: '3D'; position: absolute; left: 4px; top: 4px;
-            -webkit-text-stroke: 0; color: var(--accent); opacity: 0.3; z-index: -1;
-        }
-        .hero-description {
-            font-size: 1.25rem; color: var(--text-muted); max-width: 500px;
-            margin-bottom: 2.5rem; line-height: 1.7;
-        }
-        .hero-description strong { color: var(--text); font-weight: 600; }
+        /* ABOUT */
+        .about-grid{display:grid;grid-template-columns:350px 1fr;gap:4rem;align-items:start}
+        .about-image{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+        .about-image img{width:100%;display:block;transition:transform .5s}
+        .about-image:hover img{transform:scale(1.05)}
+        .about-image::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(255,61,0,.2),transparent);mix-blend-mode:overlay;pointer-events:none}
+        .about-content h3{font-size:1.5rem;margin-bottom:1.5rem;font-weight:700}
+        .about-content p{color:var(--text-muted);font-size:1.1rem;line-height:1.8;margin-bottom:1.5rem}
+        .about-content .highlight{color:var(--text);font-weight:600}
 
-        .cta-group { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .btn {
-            padding: 1rem 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
-            font-weight: 700; text-decoration: none; border-radius: 4px;
-            transition: all 0.3s; cursor: pointer; border: none;
-            display: inline-flex; align-items: center; gap: 0.5rem;
-        }
-        .btn-primary {
-            background: var(--accent); color: white;
-            box-shadow: 0 4px 20px var(--accent-glow);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
-        .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
-        .btn-secondary:hover {
-            border-color: var(--secondary); color: var(--secondary);
-            background: rgba(0, 229, 255, 0.05);
-        }
+        /* SKILLS */
+        .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+        .skill-card{background:var(--surface);border:1px solid var(--border);padding:2rem;border-radius:12px;transition:border-color .3s,transform .3s,background .3s;position:relative;overflow:hidden}
+        .skill-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .3s}
+        .skill-card:hover{border-color:rgba(255,61,0,.3);transform:translateY(-4px);background:rgba(255,255,255,.05)}
+        .skill-card:hover::before{opacity:1}
+        .skill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+        .skill-name{font-weight:700;font-size:1.1rem}
+        .skill-level{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);padding:.25rem .75rem;background:rgba(255,61,0,.1);border-radius:4px}
+        .skill-desc{color:var(--text-muted);font-size:.95rem;margin-bottom:1rem;line-height:1.6}
+        .skill-tools{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-muted);display:flex;gap:.5rem;flex-wrap:wrap}
+        .skill-tools span{padding:.2rem .5rem;background:rgba(255,255,255,.05);border-radius:4px;border:1px solid var(--border)}
 
-        .hero-visual { position: relative; height: 600px; display: flex; align-items: center; justify-content: center; }
-        .hero-image-wrapper {
-            position: relative; width: 100%; height: 100%;
-            border-radius: 12px; overflow: hidden;
-            border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-        .hero-image-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.95; }
-        .hero-image-wrapper::before {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(5,5,5,0.6), transparent 40%);
-            z-index: 1; pointer-events: none;
-        }
-        .floating-tag {
-            position: absolute; background: rgba(15, 15, 15, 0.9);
-            backdrop-filter: blur(10px); padding: 0.75rem 1.25rem;
-            border: 1px solid var(--border); border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
-            color: var(--text); z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .tag-1 { top: 20%; left: -20px; }
-        .tag-2 { bottom: 30%; right: -20px; color: var(--accent); }
-        .tag-3 { bottom: 10%; left: 10%; color: var(--secondary); }
+        /* WORKS */
+        .works-grid{display:grid;gap:4rem}
+        .work-card{display:grid;grid-template-columns:1.2fr 1fr;gap:3rem;align-items:center;background:var(--surface-solid);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .4s,box-shadow .4s,transform .4s;position:relative;cursor:pointer}
+        .work-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,61,0,.04),transparent);opacity:0;transition:opacity .4s;pointer-events:none;border-radius:16px}
+        .work-card:hover{border-color:rgba(255,61,0,.35);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,61,0,.1);transform:translateY(-4px)}
+        .work-card:hover::after{opacity:1}
+        .work-card:nth-child(even){direction:rtl}
+        .work-card:nth-child(even)>*{direction:ltr}
+        .work-image{position:relative;height:100%;min-height:450px;overflow:hidden;background:#000}
+        .work-image img{width:100%;height:100%;object-fit:cover;transition:opacity .4s;position:absolute;top:0;left:0}
+        .work-image img.wireframe{opacity:0;z-index:2}
+        .work-card:hover .work-image img.wireframe{opacity:1}
+        .work-card:hover .work-image img.rendered{opacity:.3}
+        .work-image img.single{opacity:1;position:relative}
 
-        /* ── SECTIONS ── */
-        section { padding: 8rem 0; position: relative; }
-        .section-header {
-            margin-bottom: 4rem; display: flex; justify-content: space-between;
-            align-items: end; flex-wrap: wrap; gap: 2rem;
+        /* VIDEO BADGE on work card */
+        .work-video-badge{
+            position:absolute;top:1rem;right:1rem;z-index:20;
+            display:flex;align-items:center;gap:.4rem;
+            padding:.35rem .8rem;border-radius:20px;
+            background:rgba(0,0,0,.75);border:1px solid rgba(255,61,0,.5);
+            backdrop-filter:blur(8px);
+            font-family:'JetBrains Mono',monospace;font-size:.68rem;
+            color:var(--accent);font-weight:700;letter-spacing:.05em;
+            transition:background .3s;
         }
-        .section-label {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent);
-            text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 1rem; display: block;
-        }
-        h2 { font-size: 2.5rem; max-width: 600px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; }
+        .work-video-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 1.5s infinite}
+        .work-card:hover .work-video-badge{background:rgba(255,61,0,.2)}
 
-        /* ── ABOUT ── */
-        .about-grid { display: grid; grid-template-columns: 350px 1fr; gap: 4rem; align-items: start; }
-        .about-image {
-            position: relative; border-radius: 12px; overflow: hidden;
-            border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        /* Video element inside work card — plays on hover */
+        .work-image video.card-video{
+            position:absolute;inset:0;width:100%;height:100%;
+            object-fit:cover;opacity:0;z-index:3;
+            transition:opacity .5s;pointer-events:none;
         }
-        .about-image img { width: 100%; display: block; transition: transform 0.5s; }
-        .about-image:hover img { transform: scale(1.05); }
-        .about-image::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(255, 61, 0, 0.2), transparent);
-            mix-blend-mode: overlay; pointer-events: none;
-        }
-        .about-content h3 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text); font-weight: 700; }
-        .about-content p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; }
-        .about-content .highlight { color: var(--text); font-weight: 600; }
+        .work-card:hover .work-image video.card-video{opacity:1}
 
-        /* ── SKILLS ── */
-        .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .skill-card {
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 2rem; border-radius: 12px; transition: all 0.3s;
-            position: relative; overflow: hidden;
-        }
-        .skill-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, var(--accent), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .skill-card:hover { border-color: rgba(255, 61, 0, 0.3); transform: translateY(-4px); background: rgba(255, 255, 255, 0.05); }
-        .skill-card:hover::before { opacity: 1; }
-        .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .skill-name { font-weight: 700; font-size: 1.1rem; }
-        .skill-level { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); padding: 0.25rem 0.75rem; background: rgba(255, 61, 0, 0.1); border-radius: 4px; }
-        .skill-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem; line-height: 1.6; }
-        .skill-tools { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .skill-tools span { padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px; border: 1px solid var(--border); }
+        .work-overlay{position:absolute;bottom:0;left:0;right:0;padding:2rem;background:linear-gradient(to top,rgba(5,5,5,.9),transparent);display:flex;gap:1rem;z-index:10;flex-wrap:wrap}
+        .tech-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.4rem .8rem;background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);backdrop-filter:blur(10px)}
+        .work-content{padding:3rem;padding-left:0}
+        .work-card:nth-child(even) .work-content{padding-left:3rem;padding-right:0}
+        .work-category{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+        .work-title{font-size:1.75rem;margin-bottom:1rem;font-weight:700}
+        .work-desc{color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem}
+        .work-meta-list{display:flex;flex-direction:column;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text-muted);margin-bottom:1.5rem}
+        .work-meta-list div{display:flex;align-items:center;gap:.5rem}
+        .work-meta-list div::before{content:'→';color:var(--accent)}
+        .view-project-btn{display:inline-flex;align-items:center;gap:.75rem;padding:.85rem 1.75rem;background:rgba(255,61,0,.08);border:1px solid rgba(255,61,0,.3);border-radius:6px;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;transition:all .3s;text-decoration:none;cursor:pointer}
+        .view-project-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 8px 25px var(--accent-glow);transform:translateX(4px)}
+        .view-project-btn .arrow{transition:transform .3s}
+        .view-project-btn:hover .arrow{transform:translateX(4px)}
 
-        /* ── WORKS ── */
-        .works-grid { display: grid; gap: 4rem; }
+        /* GALLERY */
+        .gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:4rem}
+        .gallery-item{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer;background:var(--surface-solid)}
+        .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+        .gallery-item:hover img{transform:scale(1.07)}
+        .gallery-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,5,.9),transparent);opacity:0;transition:opacity .3s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem}
+        .gallery-item:hover .gallery-overlay{opacity:1}
+        .gallery-title{font-weight:700;font-size:1.1rem;margin-bottom:.25rem}
+        .gallery-desc{font-size:.85rem;color:var(--text-muted)}
 
-        .work-card {
-            display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center;
-            background: var(--surface-solid); border: 1px solid var(--border);
-            border-radius: 16px; overflow: hidden; transition: all 0.4s;
-            position: relative; cursor: pointer;
-        }
-        .work-card::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(255,61,0,0.04), transparent);
-            opacity: 0; transition: opacity 0.4s; pointer-events: none; border-radius: 16px;
-        }
-        .work-card:hover { border-color: rgba(255, 61, 0, 0.35); box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,61,0,0.1); transform: translateY(-4px); }
-        .work-card:hover::after { opacity: 1; }
-        .work-card:nth-child(even) { direction: rtl; }
-        .work-card:nth-child(even) > * { direction: ltr; }
+        /* CARX SECTION */
+        .carx-section{background:linear-gradient(135deg,rgba(255,61,0,.05),transparent);border-top:1px solid rgba(255,61,0,.2);border-bottom:1px solid rgba(255,61,0,.2)}
+        .carx-content{max-width:800px}
+        .carx-content h2{font-size:3rem;margin-bottom:1.5rem}
+        .carx-content h2 span{color:var(--accent)}
+        .carx-content p{font-size:1.25rem;color:var(--text-muted);line-height:1.8;margin-bottom:2rem}
 
-        .work-image { position: relative; height: 100%; min-height: 450px; overflow: hidden; background: #000; }
-        .work-image img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s; position: absolute; top: 0; left: 0; }
-        .work-image img.wireframe { opacity: 0; z-index: 2; }
-        .work-card:hover .work-image img.wireframe { opacity: 1; }
-        .work-card:hover .work-image img.rendered { opacity: 0.3; }
-        .work-image img.single { opacity: 1; position: relative; }
+        /* CONTACT */
+        .contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+        .contact-card{background:var(--surface);border:1px solid var(--border);padding:2rem;border-radius:12px;text-decoration:none;color:var(--text);transition:all .3s;position:relative;overflow:hidden}
+        .contact-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,61,0,.1),transparent);opacity:0;transition:opacity .3s}
+        .contact-card:hover{border-color:var(--accent);transform:translateY(-4px)}
+        .contact-card:hover::before{opacity:1}
+        .contact-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;position:relative;z-index:1}
+        .contact-value{font-size:1.1rem;font-weight:600;position:relative;z-index:1}
+        footer{padding:4rem 0;text-align:center;border-top:1px solid var(--border);color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:.8rem}
 
-        .work-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem;
-            background: linear-gradient(to top, rgba(5,5,5,0.9), transparent);
-            display: flex; gap: 1rem; z-index: 10; flex-wrap: wrap;
+        /* ═══════════ PROJECT MODAL ═══════════ */
+        .modal-backdrop{
+            position:fixed;inset:0;z-index:1000;
+            background:rgba(0,0,0,.95);backdrop-filter:blur(12px);
+            display:flex;align-items:center;justify-content:center;padding:2rem;
+            opacity:0;pointer-events:none;
+            transition:opacity .4s cubic-bezier(.4,0,.2,1);
         }
-        .tech-tag {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
-            padding: 0.4rem 0.8rem; background: rgba(0,0,0,0.6);
-            border: 1px solid var(--border); border-radius: 4px;
-            color: var(--text-muted); backdrop-filter: blur(10px);
+        .modal-backdrop.open{opacity:1;pointer-events:all}
+        .modal{
+            width:100%;max-width:1100px;max-height:90vh;
+            background:#0a0a0a;border:1px solid rgba(255,255,255,.1);
+            border-radius:20px;overflow:hidden;
+            display:grid;grid-template-columns:1.1fr 1fr;
+            box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 0 1px rgba(255,61,0,.15);
+            transform:translate3d(0,40px,0) scale(.97);
+            transition:transform .4s cubic-bezier(.4,0,.2,1);
+            position:relative;will-change:transform;
         }
-        .work-content { padding: 3rem; padding-left: 0; }
-        .work-card:nth-child(even) .work-content { padding-left: 3rem; padding-right: 0; }
-        .work-category { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
-        .work-title { font-size: 1.75rem; margin-bottom: 1rem; font-weight: 700; }
-        .work-desc { color: var(--text-muted); line-height: 1.7; margin-bottom: 1.5rem; }
-        .work-meta-list { display: flex; flex-direction: column; gap: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
-        .work-meta-list div { display: flex; align-items: center; gap: 0.5rem; }
-        .work-meta-list div::before { content: '→'; color: var(--accent); }
+        .modal-backdrop.open .modal{transform:translate3d(0,0,0) scale(1)}
+        /* Shimmer only runs when open */
+        .modal::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:2px;
+            background:linear-gradient(90deg,transparent,var(--accent),var(--secondary),transparent);
+            background-size:200% 100%;
+            animation:shimmer 3s linear infinite;
+            animation-play-state:paused;
+        }
+        .modal-backdrop.open .modal::before{animation-play-state:running}
+        @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
-        /* View Project Button */
-        .view-project-btn {
-            display: inline-flex; align-items: center; gap: 0.75rem;
-            padding: 0.85rem 1.75rem; background: rgba(255,61,0,0.08);
-            border: 1px solid rgba(255,61,0,0.3); border-radius: 6px;
-            color: var(--accent); font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem; font-weight: 700; transition: all 0.3s;
-            text-decoration: none; cursor: pointer;
-        }
-        .view-project-btn:hover {
-            background: var(--accent); color: white;
-            border-color: var(--accent); box-shadow: 0 8px 25px var(--accent-glow);
-            transform: translateX(4px);
-        }
-        .view-project-btn .arrow { transition: transform 0.3s; }
-        .view-project-btn:hover .arrow { transform: translateX(4px); }
+        /* Gallery side */
+        .modal-gallery{position:relative;background:#000;overflow:hidden;display:flex;flex-direction:column}
+        .modal-media-area{flex:1;position:relative;overflow:hidden;min-height:350px}
 
-        /* ── GALLERY GRID ── */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 4rem; }
-        .gallery-item { position: relative; aspect-ratio: 4/3; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; background: var(--surface-solid); }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-        .gallery-item:hover img { transform: scale(1.1); }
-        .gallery-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(5,5,5,0.9), transparent);
-            opacity: 0; transition: opacity 0.3s; display: flex;
-            flex-direction: column; justify-content: flex-end; padding: 1.5rem;
-        }
-        .gallery-item:hover .gallery-overlay { opacity: 1; }
-        .gallery-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; }
-        .gallery-desc { font-size: 0.85rem; color: var(--text-muted); }
+        /* All media items stacked; only .active shown */
+        .modal-media-item{position:absolute;inset:0;opacity:0;transition:opacity .35s ease;pointer-events:none}
+        .modal-media-item.active{opacity:1;pointer-events:all}
+        .modal-media-item img{width:100%;height:100%;object-fit:cover;display:block}
+        .modal-media-item video{width:100%;height:100%;object-fit:cover;display:block;background:#000}
 
-        /* ── CARX BLOCK ── */
-        .carx-section {
-            background: linear-gradient(135deg, rgba(255, 61, 0, 0.05), transparent);
-            border-top: 1px solid rgba(255, 61, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 61, 0, 0.2);
+        /* Counter + video label */
+        .modal-img-count{
+            position:absolute;top:1rem;left:1rem;
+            background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border:1px solid var(--border);
+            padding:.3rem .75rem;border-radius:20px;
+            font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text-muted);z-index:15;
         }
-        .carx-content { max-width: 800px; }
-        .carx-content h2 { font-size: 3rem; margin-bottom: 1.5rem; }
-        .carx-content h2 span { color: var(--accent); }
-        .carx-content p { font-size: 1.25rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 2rem; }
+        .modal-video-label{
+            position:absolute;top:1rem;right:1rem;z-index:15;
+            background:var(--accent);color:#fff;
+            font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+            padding:.3rem .75rem;border-radius:20px;letter-spacing:.05em;
+            opacity:0;transition:opacity .25s;
+        }
+        .modal-media-area.is-video .modal-video-label{opacity:1}
 
-        /* ── CONTACT ── */
-        .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-        .contact-card {
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 2rem; border-radius: 12px; text-decoration: none;
-            color: var(--text); transition: all 0.3s; position: relative; overflow: hidden;
+        /* Nav arrows */
+        .modal-nav-btn{
+            position:absolute;top:50%;transform:translateY(-50%);
+            width:44px;height:44px;border-radius:50%;
+            background:rgba(10,10,10,.85);border:1px solid rgba(255,255,255,.12);
+            color:var(--text);font-size:1.1rem;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+            transition:all .25s;z-index:20;opacity:0;backdrop-filter:blur(8px);
         }
-        .contact-card::before {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(255, 61, 0, 0.1), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .contact-card:hover { border-color: var(--accent); transform: translateY(-4px); }
-        .contact-card:hover::before { opacity: 1; }
-        .contact-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; position: relative; z-index: 1; }
-        .contact-value { font-size: 1.1rem; font-weight: 600; position: relative; z-index: 1; }
+        .modal-media-area:hover .modal-nav-btn{opacity:1}
+        .modal-nav-btn:hover{background:var(--accent);border-color:var(--accent);transform:translateY(-50%) scale(1.1)}
+        .modal-prev{left:.75rem}.modal-next{right:.75rem}
 
-        /* ── FOOTER ── */
-        footer { padding: 4rem 0; text-align: center; border-top: 1px solid var(--border); color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+        /* Thumbnails */
+        .modal-thumbnails{display:flex;gap:.5rem;padding:.75rem;background:rgba(0,0,0,.5);overflow-x:auto;scrollbar-width:none}
+        .modal-thumbnails::-webkit-scrollbar{display:none}
+        .modal-thumb{
+            width:64px;height:48px;border-radius:6px;overflow:hidden;
+            border:2px solid transparent;cursor:pointer;flex-shrink:0;
+            transition:all .25s;opacity:.55;background:#111;position:relative;
+        }
+        .modal-thumb:hover{opacity:.85}
+        .modal-thumb.active{border-color:var(--accent);opacity:1}
+        .modal-thumb img{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+        /* Video thumb play icon */
+        .modal-thumb.is-video::after{content:'▶';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;background:rgba(0,0,0,.45)}
 
-        /* ═══════════════════════════════════════════
-           PROJECT MODAL — WOW EFFECT
-        ═══════════════════════════════════════════ */
-        .modal-backdrop {
-            position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(12px);
-            display: flex; align-items: center; justify-content: center;
-            padding: 2rem;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
-        }
-        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        /* Info panel */
+        .modal-info{padding:2.5rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem;position:relative;max-height:90vh}
+        .modal-info::-webkit-scrollbar{width:4px}
+        .modal-info::-webkit-scrollbar-track{background:transparent}
+        .modal-info::-webkit-scrollbar-thumb{background:rgba(255,61,0,.3);border-radius:4px}
+        .modal-close{position:absolute;top:1.25rem;right:1.25rem;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;z-index:10}
+        .modal-close:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:rotate(90deg)}
+        .modal-category{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:.15em}
+        .modal-title{font-size:1.9rem;font-weight:900;line-height:1.1;letter-spacing:-.02em}
+        .modal-subtitle{font-size:.9rem;color:var(--text-muted);line-height:1.7}
+        .modal-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+        .modal-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.35rem .8rem;border-radius:4px;border:1px solid rgba(255,61,0,.25);background:rgba(255,61,0,.07);color:var(--text-muted)}
+        .modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+        .modal-stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem;transition:border-color .3s}
+        .modal-stat:hover{border-color:rgba(255,61,0,.3)}
+        .modal-stat-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem}
+        .modal-stat-value{font-size:1rem;font-weight:700;color:var(--text)}
+        .modal-stat-value span{color:var(--accent)}
+        .modal-divider{height:1px;background:var(--border)}
+        .modal-workflow{display:flex;flex-direction:column;gap:.6rem}
+        .modal-workflow-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--secondary);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem}
+        .modal-step{display:flex;align-items:center;gap:.75rem;font-size:.85rem;color:var(--text-muted)}
+        .modal-step-num{width:22px;height:22px;border-radius:50%;background:rgba(255,61,0,.1);border:1px solid rgba(255,61,0,.3);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .modal-cta{display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;background:rgba(255,61,0,.08);border:1px solid rgba(255,61,0,.25);border-radius:10px;color:var(--text);font-size:.88rem;line-height:1.5;margin-top:auto}
+        .modal-cta-icon{font-size:1.5rem;flex-shrink:0}
+        .modal-cta em{color:var(--accent);font-style:normal;font-weight:600}
 
-        .modal {
-            width: 100%; max-width: 1100px; max-height: 90vh;
-            background: #0a0a0a;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; overflow: hidden;
-            display: grid; grid-template-columns: 1.1fr 1fr;
-            box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,61,0,0.15);
-            transform: translateY(40px) scale(0.97);
-            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-            position: relative;
-        }
-        .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+        /* SCROLL REVEAL */
+        .reveal{opacity:0;transform:translate3d(0,28px,0);transition:opacity .7s ease,transform .7s ease}
+        .reveal.visible{opacity:1;transform:translate3d(0,0,0)}
 
-        /* Animated top border */
-        .modal::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), var(--secondary), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 3s linear infinite;
-        }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-
-        .modal-gallery {
-            position: relative; background: #000; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
-        .modal-main-img {
-            flex: 1; position: relative; overflow: hidden; min-height: 350px;
-            cursor: pointer;
-        }
-        .modal-main-img img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.5s ease, opacity 0.3s;
-        }
-        .modal-main-img:hover img { transform: scale(1.03); }
-        .modal-img-count {
-            position: absolute; top: 1rem; left: 1rem;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-            border: 1px solid var(--border);
-            padding: 0.3rem 0.75rem; border-radius: 20px;
-            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-            color: var(--text-muted); z-index: 5;
-        }
-
-        /* Arrow nav */
-        .modal-nav-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            width: 44px; height: 44px; border-radius: 50%;
-            background: rgba(10,10,10,0.85); border: 1px solid rgba(255,255,255,0.12);
-            color: var(--text); font-size: 1.1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.25s; z-index: 10;
-            opacity: 0; backdrop-filter: blur(8px);
-        }
-        .modal-main-img:hover .modal-nav-btn { opacity: 1; }
-        .modal-nav-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-50%) scale(1.1); }
-        .modal-prev { left: 0.75rem; }
-        .modal-next { right: 0.75rem; }
-
-        .modal-thumbnails {
-            display: flex; gap: 0.5rem; padding: 0.75rem;
-            background: rgba(0,0,0,0.5); overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .modal-thumbnails::-webkit-scrollbar { display: none; }
-        .modal-thumb {
-            width: 64px; height: 48px; border-radius: 6px; overflow: hidden;
-            border: 2px solid transparent; cursor: pointer; flex-shrink: 0;
-            transition: all 0.25s; opacity: 0.55;
-        }
-        .modal-thumb:hover { opacity: 0.85; }
-        .modal-thumb.active { border-color: var(--accent); opacity: 1; }
-        .modal-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-        .modal-info {
-            padding: 2.5rem; overflow-y: auto; display: flex;
-            flex-direction: column; gap: 1.5rem; position: relative;
-            max-height: 90vh;
-        }
-        .modal-info::-webkit-scrollbar { width: 4px; }
-        .modal-info::-webkit-scrollbar-track { background: transparent; }
-        .modal-info::-webkit-scrollbar-thumb { background: rgba(255,61,0,0.3); border-radius: 4px; }
-
-        .modal-close {
-            position: absolute; top: 1.25rem; right: 1.25rem;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-            color: var(--text-muted); font-size: 1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.25s; z-index: 10;
-        }
-        .modal-close:hover { background: var(--accent); border-color: var(--accent); color: white; transform: rotate(90deg); }
-
-        .modal-category {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-            color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em;
-        }
-        .modal-title { font-size: 1.9rem; font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; }
-        .modal-subtitle { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
-
-        .modal-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .modal-tag {
-            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
-            padding: 0.35rem 0.8rem; border-radius: 4px;
-            border: 1px solid rgba(255,61,0,0.25);
-            background: rgba(255,61,0,0.07); color: var(--text-muted);
-        }
-
-        .modal-stats {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
-        }
-        .modal-stat {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 10px; padding: 1rem; transition: border-color 0.3s;
-        }
-        .modal-stat:hover { border-color: rgba(255,61,0,0.3); }
-        .modal-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
-        .modal-stat-value { font-size: 1rem; font-weight: 700; color: var(--text); }
-        .modal-stat-value span { color: var(--accent); }
-
-        .modal-divider { height: 1px; background: var(--border); }
-
-        .modal-workflow { display: flex; flex-direction: column; gap: 0.6rem; }
-        .modal-workflow-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.25rem; }
-        .modal-step {
-            display: flex; align-items: center; gap: 0.75rem;
-            font-size: 0.85rem; color: var(--text-muted);
-        }
-        .modal-step-num {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(255,61,0,0.1); border: 1px solid rgba(255,61,0,0.3);
-            color: var(--accent); font-family: 'JetBrains Mono', monospace;
-            font-size: 0.65rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-
-        .modal-video-placeholder {
-            background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1);
-            border-radius: 10px; padding: 1.5rem; text-align: center;
-            cursor: pointer; transition: all 0.3s;
-        }
-        .modal-video-placeholder:hover { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.03); }
-        .modal-video-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .modal-video-text { font-size: 0.82rem; color: var(--text-muted); }
-        .modal-video-text strong { color: var(--secondary); display: block; font-size: 0.85rem; }
-
-        .modal-cta {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 1rem 1.5rem; background: rgba(255,61,0,0.08);
-            border: 1px solid rgba(255,61,0,0.25); border-radius: 10px;
-            color: var(--text); font-size: 0.88rem; line-height: 1.5;
-            margin-top: auto;
-        }
-        .modal-cta-icon { font-size: 1.5rem; flex-shrink: 0; }
-        .modal-cta em { color: var(--accent); font-style: normal; font-weight: 600; }
-
-        /* ── RESPONSIVE ── */
-        @media (max-width: 968px) {
-            .hero-grid, .about-grid, .work-card { grid-template-columns: 1fr; }
-            .hero-visual { height: 400px; order: -1; }
-            .work-card:nth-child(even) { direction: ltr; }
-            .work-image { min-height: 300px; }
-            .work-content { padding: 2rem !important; }
-            .contact-grid { grid-template-columns: 1fr; }
-            .nav-links, .floating-tag { display: none; }
-            h2 { font-size: 2rem; }
-            .modal { grid-template-columns: 1fr; max-height: 95vh; }
-            .modal-gallery { max-height: 50vh; }
-            .modal-info { max-height: 45vh; }
-            .modal-stats { grid-template-columns: 1fr; }
-        }
-
-        /* ── SCROLL REVEAL ── */
-        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        /* ── GLITCH ── */
-        @keyframes glitch-1 {
-            0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
-            25% { clip-path: inset(30% 0 50% 0); transform: translate(2px, 0); }
-            50% { clip-path: inset(65% 0 20% 0); transform: translate(-1px, 0); }
-        }
-        @keyframes glitch-2 {
-            0%, 100% { clip-path: inset(50% 0 30% 0); transform: translate(2px, 0); }
-            33% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 0); }
-            66% { clip-path: inset(85% 0 5% 0); transform: translate(1px, 0); }
+        /* RESPONSIVE */
+        @media(max-width:968px){
+            .hero-grid,.about-grid,.work-card{grid-template-columns:1fr}
+            .hero-visual{height:400px;order:-1}
+            .work-card:nth-child(even){direction:ltr}
+            .work-image{min-height:300px}
+            .work-content{padding:2rem!important}
+            .contact-grid{grid-template-columns:1fr}
+            .nav-links,.floating-tag{display:none}
+            h2{font-size:2rem}
+            .modal{grid-template-columns:1fr;max-height:95vh}
+            .modal-gallery{max-height:50vh}
+            .modal-info{max-height:45vh}
+            .modal-stats{grid-template-columns:1fr}
         }
     </style>
 </head>
 <body>
 
-<!-- Cursor glow -->
 <div class="cursor-glow" id="cursorGlow"></div>
 
-<!-- ══════════════ MODALS ══════════════ -->
+<!-- ════════════════ MODALS ════════════════ -->
 
-<!-- Modal: Car -->
+<!-- Car -->
 <div class="modal-backdrop" id="modal-car">
-    <div class="modal">
-        <div class="modal-gallery">
-            <div class="modal-main-img" id="car-gallery">
-                <span class="modal-img-count" id="car-count">1 / 6</span>
-                <img src="1.png" alt="Car render" id="car-main-img">
-                <button class="modal-nav-btn modal-prev" onclick="changeImg('car',-1)">&#8249;</button>
-                <button class="modal-nav-btn modal-next" onclick="changeImg('car',1)">&#8250;</button>
-            </div>
-            <div class="modal-thumbnails" id="car-thumbs">
-                <div class="modal-thumb active" onclick="setImg('car',0)"><img src="1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('car',1)"><img src="1.1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('car',2)"><img src="2.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('car',3)"><img src="3.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('car',4)"><img src="4.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('car',5)"><img src="5.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('car',6)"><img src="сетка2.png" alt=""></div>
-            </div>
-        </div>
-        <div class="modal-info">
-            <button class="modal-close" onclick="closeModal('car')">&#215;</button>
-            <div>
-                <div class="modal-category">Hard Surface / Vehicle</div>
-                <div class="modal-title">Chevrolet Corvette</div>
-            </div>
-            <div class="modal-subtitle">
-                Практическая работа по hard surface modeling. Автомобиль полностью создан в Blender с использованием Subdivision Surface и Shrinkwrap modifiers. Особое внимание уделено чистой quad-топологии и edge flow, чтобы поверхности правильно ловили свет и давали красивые отражения.
-            </div>
-            <div class="modal-tags">
-                <span class="modal-tag">Blender 4.5</span>
-                <span class="modal-tag">Subdivision Modeling</span>
-                <span class="modal-tag">Shrinkwrap</span>
-                <span class="modal-tag">Hard Surface</span>
-                <span class="modal-tag">4K Textures</span>
-            </div>
-            <div class="modal-stats">
-                <div class="modal-stat">
-                    <div class="modal-stat-label">POLYGONS</div>
-                    <div class="modal-stat-value"><span>450 000+ </span>polys после subdivision</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">TOPOLOGY</div>
-                    <div class="modal-stat-value"><span>Clean Quad + </span>Edge Flow</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">SHADING</div>
-                    <div class="modal-stat-value">Procedural Node-based</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">MODIFIERS</div>
-                    <div class="modal-stat-value">Subdivision +<span> Shrinkwrap</span></div>
-                </div>
-            </div>
-            <div class="modal-divider"></div>
-            <div class="modal-workflow">
-                <div class="modal-workflow-label">// Pipeline</div>
-                <div class="modal-step"><div class="modal-step-num">1</div>Blockout и уточнение пропорций</div>
-                <div class="modal-step"><div class="modal-step-num">2</div>High-poly detailing с Subdivision Surface</div>
-                <div class="modal-step"><div class="modal-step-num">3</div>Clean topology и edge flow optimization</div>
-                <div class="modal-step"><div class="modal-step-num">4</div>Shrinkwrap для контроля форм</div>
-                <div class="modal-step"><div class="modal-step-num">5</div>Procedural texturing и shading через Blender Nodes</div>
-            </div>
-            <div class="modal-cta">
-                <div class="modal-cta-icon">🏎</div>
-                <div>Создано специально для демонстрации <em>game-ready pipeline</em>. Wireframe доступен при наведении на карточку работы.</div>
-            </div>
-        </div>
+  <div class="modal">
+    <div class="modal-gallery">
+      <div class="modal-media-area" id="car-area">
+        <span class="modal-img-count" id="car-count">1/1</span>
+        <span class="modal-video-label">▶ VIDEO</span>
+        <button class="modal-nav-btn modal-prev" onclick="changeMedia('car',-1)">&#8249;</button>
+        <button class="modal-nav-btn modal-next" onclick="changeMedia('car',1)">&#8250;</button>
+      </div>
+      <div class="modal-thumbnails" id="car-thumbs"></div>
     </div>
+    <div class="modal-info">
+      <button class="modal-close" onclick="closeModal('car')">&#215;</button>
+      <div><div class="modal-category">Hard Surface / Vehicle</div><div class="modal-title">Chevrolet Corvette</div></div>
+      <div class="modal-subtitle">Практическая работа по hard surface modeling. Автомобиль создан в Blender с Subdivision Surface и Shrinkwrap modifiers. Особое внимание — чистой quad-топологии и edge flow для правильного отражения света.</div>
+      <div class="modal-tags"><span class="modal-tag">Blender 4.5</span><span class="modal-tag">Subdivision Modeling</span><span class="modal-tag">Shrinkwrap</span><span class="modal-tag">Hard Surface</span><span class="modal-tag">4K Textures</span></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-label">POLYGONS</div><div class="modal-stat-value"><span>450 000+</span> после subdivision</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">TOPOLOGY</div><div class="modal-stat-value"><span>Clean Quad</span> + Edge Flow</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">SHADING</div><div class="modal-stat-value">Procedural Node-based</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">MODIFIERS</div><div class="modal-stat-value">Subdivision + <span>Shrinkwrap</span></div></div>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-workflow">
+        <div class="modal-workflow-label">// Pipeline</div>
+        <div class="modal-step"><div class="modal-step-num">1</div>Blockout и уточнение пропорций</div>
+        <div class="modal-step"><div class="modal-step-num">2</div>High-poly detailing с Subdivision Surface</div>
+        <div class="modal-step"><div class="modal-step-num">3</div>Clean topology и edge flow optimization</div>
+        <div class="modal-step"><div class="modal-step-num">4</div>Shrinkwrap для контроля форм</div>
+        <div class="modal-step"><div class="modal-step-num">5</div>Procedural texturing и shading через Blender Nodes</div>
+      </div>
+      <div class="modal-cta"><div class="modal-cta-icon">🏎</div><div>Wireframe доступен при наведении на <em>карточку работы</em>.</div></div>
+    </div>
+  </div>
 </div>
 
-<!-- Modal: Mech -->
-
+<!-- Mech -->
 <div class="modal-backdrop" id="modal-mech">
-
-    <div class="modal">
-
-        <div class="modal-gallery">
-
-            <div class="modal-main-img" id="mech-gallery">
-
-                <span class="modal-img-count" id="mech-count">1 / 4</span>
-
-                <img src="meh_2k.png" alt="Mech" id="mech-main-img">
-
-                <button class="modal-nav-btn modal-prev" onclick="changeImg('mech',-1)">&#8249;</button>
-
-                <button class="modal-nav-btn modal-next" onclick="changeImg('mech',1)">&#8250;</button>
-
-            </div>
-
-            <div class="modal-thumbnails" id="mech-thumbs">
-
-                <div class="modal-thumb active" onclick="setImg('mech',0)"><img src="meh_2k.png" alt=""></div>
-
-                <div class="modal-thumb" onclick="setImg('mech',1)"><img src="meh_1.png" alt=""></div>
-
-                <div class="modal-thumb" onclick="setImg('mech',2)"><img src="meh_2.png" alt=""></div>
-
-                <div class="modal-thumb" onclick="setImg('mech',3)"><img src="meh_3.png" alt=""></div>
-
-                <div class="modal-thumb" onclick="setImg('mech',4)"><img src="meh_4.png" alt=""></div>
-
-            </div>
-
-        </div>
-
-        <div class="modal-info">
-
-            <button class="modal-close" onclick="closeModal('mech')">&#215;</button>
-
-            <div>
-
-                <div class="modal-category">Hard Surface / Character Mech</div>
-
-                <div class="modal-title">Combat Mech MK-VII</div>
-
-            </div>
-
-            <div class="modal-subtitle">
-
-                Боевой мех для sci-fi шутера. Конструкция разбита на отдельные элементы (оружие, корпус, детали), что упрощает возможную модульную доработку. Все панели, заклёпки и трубки — отдельные меши с clean topology.
-
-            </div>
-
-            <div class="modal-tags">
-
-                <span class="modal-tag">Blender</span>
-
-                <span class="modal-tag">Hard Surface</span>
-
-                <span class="modal-tag">Substance Painter</span>
-
-                <span class="modal-tag">Modular</span>
-
-                <span class="modal-tag">Sci-Fi</span>
-
-                <span class="modal-tag">2K Atlas</span>
-
-            </div>
-
-            <div class="modal-stats">
-
-                <div class="modal-stat">
-
-                    <div class="modal-stat-label">Tris</div>
-
-                    <div class="modal-stat-value"><span>~38 000</span></div>
-
-                </div>
-
-                <div class="modal-stat">
-
-                    <div class="modal-stat-label">Texture</div>
-
-                    <div class="modal-stat-value"><span>2K</span> Atlas</div>
-
-                </div>
-
-                <div class="modal-stat">
-
-                    <div class="modal-stat-label">Модульность</div>
-
-                    <div class="modal-stat-value"><span>5</span> swap-зон</div>
-
-                </div>
-
-                <div class="modal-stat">
-
-                    <div class="modal-stat-label">Wear layers</div>
-
-                    <div class="modal-stat-value">Vertex <span>paint</span></div>
-
-                </div>
-
-            </div>
-
-            <div class="modal-divider"></div>
-
-            <div class="modal-workflow">
-
-                <div class="modal-workflow-label">// Pipeline</div>
-
-                <div class="modal-step"><div class="modal-step-num">1</div>Силуэт и пропорции меха</div>
-
-                <div class="modal-step"><div class="modal-step-num">2</div>Hard surface детализация панелей</div>
-
-                <div class="modal-step"><div class="modal-step-num">3</div>Boolean workflow для вырезов</div>
-
-                <div class="modal-step"><div class="modal-step-num">4</div>Retopo + модульная система</div>
-
-                <div class="modal-step"><div class="modal-step-num">5</div>2K texture atlas с damage layers</div>
-
-            </div>
-
-            <div class="modal-cta">
-
-                <div class="modal-cta-icon">🤖</div>
-
-                <div>Возможна адаптация модели под <em>разные конфигурации</em> за счёт разделения на элементы.</div>
-
-            </div>
-
-        </div>
-
+  <div class="modal">
+    <div class="modal-gallery">
+      <div class="modal-media-area" id="mech-area">
+        <span class="modal-img-count" id="mech-count">1/1</span>
+        <span class="modal-video-label">▶ VIDEO</span>
+        <button class="modal-nav-btn modal-prev" onclick="changeMedia('mech',-1)">&#8249;</button>
+        <button class="modal-nav-btn modal-next" onclick="changeMedia('mech',1)">&#8250;</button>
+      </div>
+      <div class="modal-thumbnails" id="mech-thumbs"></div>
     </div>
-
+    <div class="modal-info">
+      <button class="modal-close" onclick="closeModal('mech')">&#215;</button>
+      <div><div class="modal-category">Hard Surface / Character Mech</div><div class="modal-title">Combat Mech MK-VII</div></div>
+      <div class="modal-subtitle">Боевой мех для sci-fi шутера. Конструкция разбита на отдельные элементы (оружие, корпус, детали). Все панели, заклёпки и трубки — отдельные меши с clean topology.</div>
+      <div class="modal-tags"><span class="modal-tag">Blender</span><span class="modal-tag">Hard Surface</span><span class="modal-tag">Substance Painter</span><span class="modal-tag">Modular</span><span class="modal-tag">Sci-Fi</span><span class="modal-tag">2K Atlas</span></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-label">Tris</div><div class="modal-stat-value"><span>~38 000</span></div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Texture</div><div class="modal-stat-value"><span>2K</span> Atlas</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Модульность</div><div class="modal-stat-value"><span>5</span> swap-зон</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Wear layers</div><div class="modal-stat-value">Vertex <span>paint</span></div></div>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-workflow">
+        <div class="modal-workflow-label">// Pipeline</div>
+        <div class="modal-step"><div class="modal-step-num">1</div>Силуэт и пропорции меха</div>
+        <div class="modal-step"><div class="modal-step-num">2</div>Hard surface детализация панелей</div>
+        <div class="modal-step"><div class="modal-step-num">3</div>Boolean workflow для вырезов</div>
+        <div class="modal-step"><div class="modal-step-num">4</div>Retopo + модульная система</div>
+        <div class="modal-step"><div class="modal-step-num">5</div>2K texture atlas с damage layers</div>
+      </div>
+      <div class="modal-cta"><div class="modal-cta-icon">🤖</div><div>Возможна адаптация под <em>разные конфигурации</em> за счёт разделения на элементы.</div></div>
+    </div>
+  </div>
 </div>
 
-<!-- Modal: Barrels -->
+<!-- Barrels -->
 <div class="modal-backdrop" id="modal-barrels">
-    <div class="modal">
-        <div class="modal-gallery">
-            <div class="modal-main-img" id="barrels-gallery">
-                <span class="modal-img-count" id="barrels-count">1 / 5</span>
-                <img src="Barrel_1.png" alt="Barrels" id="barrels-main-img">
-                <button class="modal-nav-btn modal-prev" onclick="changeImg('barrels',-1)">&#8249;</button>
-                <button class="modal-nav-btn modal-next" onclick="changeImg('barrels',1)">&#8250;</button>
-            </div>
-            <div class="modal-thumbnails" id="barrels-thumbs">
-                <div class="modal-thumb active" onclick="setImg('barrels',0)"><img src="Barrel_1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('barrels',1)"><img src="Barrel_2.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('barrels',2)"><img src="Barrel_3.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('barrels',3)"><img src="Barrel_4.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('barrels',4)"><img src="Barrel_5.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('barrels',5)"><img src="Barrel_6.png" alt=""></div>
-            </div>
-        </div>
-        <div class="modal-info">
-            <button class="modal-close" onclick="closeModal('barrels')">&#215;</button>
-            <div>
-                <div class="modal-category">Props / Environment</div>
-                <div class="modal-title">Industrial Hazmat Set</div>
-            </div>
-            <div class="modal-subtitle">
-                Набор CGI пропсов (бочки) для индустриальных сцен. Созданы в Blender, 3 варианта ассетов объединены в один texture atlas для оптимизации. Материалы настроены через node-based шейдинг. Для вариативности инстансов использованы vertex color masks (грязь, износ, цветовые отличия). Оптимизировано под инстансинг и real-time рендер.
-            </div>
-            <div class="modal-tags">
-                <span class="modal-tag">Modular Props</span>
-                <span class="modal-tag">2K Atlas</span>
-                <span class="modal-tag">Vertex Paint</span>
-                <span class="modal-tag">Node-based шейдинг</span>
-                <span class="modal-tag">GPU Batching</span>
-            </div>
-            <div class="modal-stats">
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Варианты</div>
-                    <div class="modal-stat-value"><span>3</span> цвета</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Texture</div>
-                    <div class="modal-stat-value"><span>2K</span> shared</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Draw Calls</div>
-                    <div class="modal-stat-value"><span>1</span> на сет</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Damage</div>
-                    <div class="modal-stat-value">Vertex <span>mask</span></div>
-                </div>
-            </div>
-            <div class="modal-divider"></div>
-            <div class="modal-workflow">
-                <div class="modal-workflow-label">// Pipeline</div>
-                <div class="modal-step"><div class="modal-step-num">1</div>Base mesh → 3 shape variants</div>
-                <div class="modal-step"><div class="modal-step-num">2</div>Shared UV layout на одном атласе</div>
-                <div class="modal-step"><div class="modal-step-num">3</div>Normal bake с unique overlaps</div>
-                <div class="modal-step"><div class="modal-step-num">4</div>Vertex color wear masks</div>
-                <div class="modal-step"><div class="modal-step-num">5</div>Background dressing optimization</div>
-            </div>
-            <div class="modal-cta">
-                <div class="modal-cta-icon">🛢</div>
-                <div>Vertex color masks дают <em>неограниченное количество вариаций</em> без новых draw calls — идеал для окружения треков.</div>
-            </div>
-        </div>
+  <div class="modal">
+    <div class="modal-gallery">
+      <div class="modal-media-area" id="barrels-area">
+        <span class="modal-img-count" id="barrels-count">1/1</span>
+        <span class="modal-video-label">▶ VIDEO</span>
+        <button class="modal-nav-btn modal-prev" onclick="changeMedia('barrels',-1)">&#8249;</button>
+        <button class="modal-nav-btn modal-next" onclick="changeMedia('barrels',1)">&#8250;</button>
+      </div>
+      <div class="modal-thumbnails" id="barrels-thumbs"></div>
     </div>
+    <div class="modal-info">
+      <button class="modal-close" onclick="closeModal('barrels')">&#215;</button>
+      <div><div class="modal-category">Props / Environment</div><div class="modal-title">Industrial Hazmat Set</div></div>
+      <div class="modal-subtitle">Набор CGI пропсов (бочки) для индустриальных сцен. 3 варианта ассетов на одном texture atlas. Vertex color masks для вариативности инстансов без дополнительных материалов.</div>
+      <div class="modal-tags"><span class="modal-tag">Modular Props</span><span class="modal-tag">2K Atlas</span><span class="modal-tag">Vertex Paint</span><span class="modal-tag">Node-based шейдинг</span><span class="modal-tag">GPU Batching</span></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-label">Варианты</div><div class="modal-stat-value"><span>3</span> цвета</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Texture</div><div class="modal-stat-value"><span>2K</span> shared</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Draw Calls</div><div class="modal-stat-value"><span>1</span> на сет</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Damage</div><div class="modal-stat-value">Vertex <span>mask</span></div></div>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-workflow">
+        <div class="modal-workflow-label">// Pipeline</div>
+        <div class="modal-step"><div class="modal-step-num">1</div>Base mesh → 3 shape variants</div>
+        <div class="modal-step"><div class="modal-step-num">2</div>Shared UV layout на одном атласе</div>
+        <div class="modal-step"><div class="modal-step-num">3</div>Normal bake с unique overlaps</div>
+        <div class="modal-step"><div class="modal-step-num">4</div>Vertex color wear masks</div>
+        <div class="modal-step"><div class="modal-step-num">5</div>Background dressing optimization</div>
+      </div>
+      <div class="modal-cta"><div class="modal-cta-icon">🛢</div><div>Vertex color masks дают <em>неограниченное количество вариаций</em> без новых draw calls.</div></div>
+    </div>
+  </div>
 </div>
 
-<!-- Modal: Environment -->
-<div class="modal-backdrop" id="modal-env">
-    <div class="modal">
-        <div class="modal-gallery">
-            <div class="modal-main-img" id="env-gallery">
-                <span class="modal-img-count" id="env-count">1 / 4</span>
-                <img src="Home2.png" alt="Environment" id="env-main-img">
-                <button class="modal-nav-btn modal-prev" onclick="changeImg('env',-1)">&#8249;</button>
-                <button class="modal-nav-btn modal-next" onclick="changeImg('env',1)">&#8250;</button>
-            </div>
-            <div class="modal-thumbnails" id="env-thumbs">
-                <div class="modal-thumb active" onclick="setImg('env',0)"><img src="Home2.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('env',1)"><img src="Home1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('env',2)"><img src="Home3.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('env',3)"><img src="Home4.png" alt=""></div>
-            </div>
-        </div>
-        <div class="modal-info">
-            <button class="modal-close" onclick="closeModal('env')">&#215;</button>
-            <div>
-                <div class="modal-category">Environment / Scene Assembly</div>
-                <div class="modal-title">Watermill Diorama</div>
-            </div>
-            <div class="modal-subtitle">
-                Полная сборка сцены в Unity URP. Кастомные шейдеры для воды и травы, mixed lighting, пост-обработка. Оптимизирована для real-time, протестирована в Unity URP.
-            </div>
-            <div class="modal-tags">
-                <span class="modal-tag">Unity URP</span>
-                <span class="modal-tag">Scene Assembly</span>
-                <span class="modal-tag">Custom Shaders</span>
-                <span class="modal-tag">Mixed Lighting</span>
-                <span class="modal-tag">LOD</span>
-                <span class="modal-tag">Post Process</span>
-            </div>
-            <div class="modal-stats">
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Target FPS</div>
-                    <div class="modal-stat-value"><span>60</span> mobile</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Water</div>
-                    <div class="modal-stat-value">Custom <span>shader</span></div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Lighting</div>
-                    <div class="modal-stat-value">Mixed <span>baked</span></div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Vegetation</div>
-                    <div class="modal-stat-value">Wind <span>anim</span></div>
-                </div>
-            </div>
-            <div class="modal-divider"></div>
-            <div class="modal-workflow">
-                <div class="modal-workflow-label">// Pipeline</div>
-                <div class="modal-step"><div class="modal-step-num">1</div>Asset modelling + LOD chain</div>
-                <div class="modal-step"><div class="modal-step-num">2</div>Unity scene assembly</div>
-                <div class="modal-step"><div class="modal-step-num">3</div>Custom water + grass shaders</div>
-                <div class="modal-step"><div class="modal-step-num">4</div>Mixed lighting bake</div>
-                <div class="modal-step"><div class="modal-step-num">5</div>Profiling → 60 FPS mobile</div>
-            </div>
-            <div class="modal-cta">
-                <div class="modal-cta-icon">🌊</div>
-                <div>Кастомный water shader с <em>refraction и foam</em> добавляет жизни сцене без дорогостоящих симуляций физики.</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Japanese Street -->
+<!-- Japan -->
 <div class="modal-backdrop" id="modal-japan">
-    <div class="modal">
-        <div class="modal-gallery">
-            <div class="modal-main-img" id="japan-gallery">
-                <span class="modal-img-count" id="japan-count">1 / 3</span>
-                <img src="japan_1.png" alt="Japan Street" id="japan-main-img">
-                <button class="modal-nav-btn modal-prev" onclick="changeImg('japan',-1)">&#8249;</button>
-                <button class="modal-nav-btn modal-next" onclick="changeImg('japan',1)">&#8250;</button>
-            </div>
-            <div class="modal-thumbnails" id="japan-thumbs">
-                <div class="modal-thumb active" onclick="setImg('japan',0)"><img src="japan_1.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('japan',1)"><img src="japan_2.png" alt=""></div>
-                <div class="modal-thumb" onclick="setImg('japan',2)"><img src="japan_3.png" alt=""></div>
-            </div>
-        </div>
-        <div class="modal-info">
-            <button class="modal-close" onclick="closeModal('japan')">&#215;</button>
-            <div>
-                <div class="modal-category">Environment / Urban Scene</div>
-                <div class="modal-title">ばらのにわ — Japan Street</div>
-            </div>
-            <div class="modal-subtitle">
-                Детальная модульная городская среда в японском стиле. Уличные вендинг-машины, неоновые вывески, плотная застройка с рекламными щитами. Оптимизирован для реального времени с модульными строительными блоками.
-            </div>
-            <div class="modal-tags">
-                <span class="modal-tag">Blender</span>
-                <span class="modal-tag">Modular Kit</span>
-                <span class="modal-tag">Japan</span>
-                <span class="modal-tag">Urban Environment</span>
-                <span class="modal-tag">Neon / Emissive</span>
-                <span class="modal-tag">Substance Painter</span>
-            </div>
-            <div class="modal-stats">
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Тип сцены</div>
-                    <div class="modal-stat-value">Modular <span>Kit</span></div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Стиль</div>
-                    <div class="modal-stat-value">Japan <span>City</span></div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Пропсы</div>
-                    <div class="modal-stat-value"><span>20+</span> уникальных</div>
-                </div>
-                <div class="modal-stat">
-                    <div class="modal-stat-label">Атмосфера</div>
-                    <div class="modal-stat-value">Emissive <span>glow</span></div>
-                </div>
-            </div>
-            <div class="modal-divider"></div>
-            <div class="modal-workflow">
-                <div class="modal-workflow-label">// Pipeline</div>
-                <div class="modal-step"><div class="modal-step-num">1</div>Модульная сетка зданий</div>
-                <div class="modal-step"><div class="modal-step-num">2</div>Prop library — вывески, машины</div>
-                <div class="modal-step"><div class="modal-step-num">3</div>Emissive material для неона</div>
-                <div class="modal-step"><div class="modal-step-num">4</div>Птичий вид + street level рендер</div>
-                <div class="modal-step"><div class="modal-step-num">5</div>Interior vending machine scene</div>
-            </div>
-            <div class="modal-cta">
-                <div class="modal-cta-icon">🏮</div>
-                <div>Модульный набор позволяет <em>быстро</em> собирать вариации городской среды.</div>
-            </div>
-        </div>
+  <div class="modal">
+    <div class="modal-gallery">
+      <div class="modal-media-area" id="japan-area">
+        <span class="modal-img-count" id="japan-count">1/1</span>
+        <span class="modal-video-label">▶ VIDEO</span>
+        <button class="modal-nav-btn modal-prev" onclick="changeMedia('japan',-1)">&#8249;</button>
+        <button class="modal-nav-btn modal-next" onclick="changeMedia('japan',1)">&#8250;</button>
+      </div>
+      <div class="modal-thumbnails" id="japan-thumbs"></div>
     </div>
+    <div class="modal-info">
+      <button class="modal-close" onclick="closeModal('japan')">&#215;</button>
+      <div><div class="modal-category">Environment / Urban Scene</div><div class="modal-title">ばらのにわ — Japan Street</div></div>
+      <div class="modal-subtitle">Детальная модульная городская среда в японском стиле. Вендинг-машины, неоновые вывески, плотная застройка с рекламными щитами. Оптимизирован для real-time с модульными строительными блоками.</div>
+      <div class="modal-tags"><span class="modal-tag">Blender</span><span class="modal-tag">Modular Kit</span><span class="modal-tag">Japan</span><span class="modal-tag">Urban Environment</span><span class="modal-tag">Neon / Emissive</span><span class="modal-tag">Substance Painter</span></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-label">Тип сцены</div><div class="modal-stat-value">Modular <span>Kit</span></div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Стиль</div><div class="modal-stat-value">Japan <span>City</span></div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Пропсы</div><div class="modal-stat-value"><span>20+</span> уникальных</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Атмосфера</div><div class="modal-stat-value">Emissive <span>glow</span></div></div>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-workflow">
+        <div class="modal-workflow-label">// Pipeline</div>
+        <div class="modal-step"><div class="modal-step-num">1</div>Модульная сетка зданий</div>
+        <div class="modal-step"><div class="modal-step-num">2</div>Prop library — вывески, машины</div>
+        <div class="modal-step"><div class="modal-step-num">3</div>Emissive material для неона</div>
+        <div class="modal-step"><div class="modal-step-num">4</div>Птичий вид + street level рендер</div>
+        <div class="modal-step"><div class="modal-step-num">5</div>Interior vending machine scene</div>
+      </div>
+      <div class="modal-cta"><div class="modal-cta-icon">🏮</div><div>Модульный набор позволяет <em>быстро</em> собирать вариации городской среды.</div></div>
+    </div>
+  </div>
 </div>
 
-<!-- New Video Modal -->
-<div class="modal-backdrop" id="modal-video">
-    <div class="modal" style="grid-template-columns: 1fr; max-width: 960px;">
-        <div class="modal-gallery" style="padding: 2rem; background: #000; position: relative;">
-            <button class="modal-close" onclick="closeVideoModal()" style="top: 1.5rem; right: 1.5rem; z-index: 10;">✕</button>
-            
-            <video id="video-player" 
-                   controls 
-                   autoplay 
-                   loop 
-                   muted 
-                   style="width: 100%; max-height: 70vh; border-radius: 16px; background: #111;">
-                <source id="video-source" src="" type="video/mp4">
-                Ваш браузер не поддерживает видео.
-            </video>
-
-            <div style="margin-top: 1rem; text-align: center;">
-                <span id="video-title" style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.05em;"></span>
-            </div>
-        </div>
+<!-- Env -->
+<div class="modal-backdrop" id="modal-env">
+  <div class="modal">
+    <div class="modal-gallery">
+      <div class="modal-media-area" id="env-area">
+        <span class="modal-img-count" id="env-count">1/1</span>
+        <span class="modal-video-label">▶ VIDEO</span>
+        <button class="modal-nav-btn modal-prev" onclick="changeMedia('env',-1)">&#8249;</button>
+        <button class="modal-nav-btn modal-next" onclick="changeMedia('env',1)">&#8250;</button>
+      </div>
+      <div class="modal-thumbnails" id="env-thumbs"></div>
     </div>
-</div>    
-    
-<!-- ══════════════ PAGE ══════════════ -->
+    <div class="modal-info">
+      <button class="modal-close" onclick="closeModal('env')">&#215;</button>
+      <div><div class="modal-category">Environment / Scene Assembly</div><div class="modal-title">Watermill Diorama</div></div>
+      <div class="modal-subtitle">Полная сборка сцены в Unity URP. Кастомные шейдеры для воды и травы, mixed lighting, пост-обработка. Оптимизирована для real-time, протестирована в Unity URP.</div>
+      <div class="modal-tags"><span class="modal-tag">Unity URP</span><span class="modal-tag">Scene Assembly</span><span class="modal-tag">Custom Shaders</span><span class="modal-tag">Mixed Lighting</span><span class="modal-tag">LOD</span><span class="modal-tag">Post Process</span></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-label">Target FPS</div><div class="modal-stat-value"><span>60</span> mobile</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Water</div><div class="modal-stat-value">Custom <span>shader</span></div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Lighting</div><div class="modal-stat-value">Mixed <span>baked</span></div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Vegetation</div><div class="modal-stat-value">Wind <span>anim</span></div></div>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-workflow">
+        <div class="modal-workflow-label">// Pipeline</div>
+        <div class="modal-step"><div class="modal-step-num">1</div>Asset modelling + LOD chain</div>
+        <div class="modal-step"><div class="modal-step-num">2</div>Unity scene assembly</div>
+        <div class="modal-step"><div class="modal-step-num">3</div>Custom water + grass shaders</div>
+        <div class="modal-step"><div class="modal-step-num">4</div>Mixed lighting bake</div>
+        <div class="modal-step"><div class="modal-step-num">5</div>Profiling → 60 FPS mobile</div>
+      </div>
+      <div class="modal-cta"><div class="modal-cta-icon">🌊</div><div>Кастомный water shader с <em>refraction и foam</em> без дорогостоящих симуляций физики.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Gallery video fullscreen -->
+<div class="modal-backdrop" id="modal-vid" style="z-index:1100" onclick="if(event.target===this)closeVid()">
+  <div style="position:relative;width:100%;max-width:960px;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--border)">
+    <button onclick="closeVid()" style="position:absolute;top:1rem;right:1rem;z-index:10;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid var(--border);color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">&#215;</button>
+    <video id="vid-player" controls autoplay loop muted playsinline style="width:100%;max-height:75vh;display:block;background:#000">
+      <source src="simple_scene_animate.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<!-- ════════════════ PAGE ════════════════ -->
 
 <nav>
-    <div class="container">
-        <a href="#" class="logo">VOICHUK.3D</a>
-        <ul class="nav-links">
-            <li><a href="#about">Обо мне</a></li>
-            <li><a href="#skills">Навыки</a></li>
-            <li><a href="#works">Работы</a></li>
-            <li><a href="#contact">Контакт</a></li>
-        </ul>
-    </div>
+  <div class="container">
+    <a href="#" class="logo">VOICHUK.3D</a>
+    <ul class="nav-links">
+      <li><a href="#about">Обо мне</a></li>
+      <li><a href="#skills">Навыки</a></li>
+      <li><a href="#works">Работы</a></li>
+      <li><a href="#contact">Контакт</a></li>
+    </ul>
+  </div>
 </nav>
 
 <section class="hero">
-    <div class="container">
-        <div class="hero-grid">
-            <div class="hero-content reveal">
-                <div class="badge">Готов к выполнению тестового задания</div>
-                <h1><br><span>3D</span> Artist <h2>(Game-ready assets / Marketing visuals)</h2></h1>
-                <p class="hero-description">
-                    Создаю <strong>game-ready ассеты</strong> для real-time проектов (Unity, mobile/PC)
-                    Специализация — <strong>Hard Surface</strong>, автомобили,
-                    индустриальные пропсы. Работаю в <strong>Blender</strong>,
-                    текстурирую в <strong>Substance Painter</strong>,
-                    собираю сцены в <strong>Unity</strong>.
-                </p>
-                <div class="cta-group">
-                    <a href="#works" class="btn btn-primary">Смотреть работы</a>
-                    <a href="https://t.me/Ghost_LT42" class="btn btn-secondary">Telegram →</a>
-                </div>
-            </div>
-            <div class="hero-visual reveal">
-                <div class="hero-image-wrapper">
-                    <img src="5.png" alt="Concept Vehicle">
-                </div>
-                <div class="floating-tag tag-1">Blender 4.5</div>
-                <div class="floating-tag tag-2">Procedural Shading</div>
-                <div class="floating-tag tag-3">Clean Topology</div>
-            </div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content reveal">
+        <div class="badge">Готов к выполнению тестового задания</div>
+        <h1><span>3D</span> Artist</h1>
+        <p class="hero-description">
+          Создаю <strong>game-ready ассеты</strong> для real-time проектов (Unity, mobile/PC).
+          Специализация — <strong>Hard Surface</strong>, автомобили, индустриальные пропсы.
+          Работаю в <strong>Blender</strong>, текстурирую в <strong>Substance Painter</strong>, собираю сцены в <strong>Unity</strong>.
+        </p>
+        <div class="cta-group">
+          <a href="#works" class="btn btn-primary">Смотреть работы</a>
+          <a href="https://t.me/Ghost_LT42" class="btn btn-secondary">Telegram →</a>
         </div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="hero-image-wrapper">
+          <img src="5.png" alt="Concept Vehicle" width="580" height="580" fetchpriority="high">
+        </div>
+        <div class="floating-tag tag-1">Blender 4.5</div>
+        <div class="floating-tag tag-2">Procedural Shading</div>
+        <div class="floating-tag tag-3">Clean Topology</div>
+      </div>
     </div>
+  </div>
 </section>
 
 <section id="about">
-    <div class="container">
-        <div class="section-header reveal">
-            <div>
-                <span class="section-label">// Обо мне</span>
-                <h2>Junior 3D Artist<br>с фокусом на game-ready пайплайн</h2>
-            </div>
-        </div>
-        <div class="about-grid">
-            <div class="about-image reveal">
-                <img src="3Gemini_Generated_Image_6smcmb6smcmb6smc.png" alt="Сергей Войчук">
-            </div>
-            <div class="about-content reveal">
-                <h3>Привет, я Сергей</h3>
-                <p>Я <span class="highlight">3D Generalist</span> из Краснодара. Создаю game-ready 3D ассеты и окружение для real-time проектов (Unity). Понимаю разницу между <span class="highlight">high-poly для рендера</span> и <span class="highlight">low-poly для real-time</span>.</p>
-                <p>Работаю с <span class="highlight">hard surface и environment</span>: от моделирования до подготовки под движок (UV, LOD, оптимизация). Учитываю требования к <span class="highlight">топологии</span> для анимации и деформаций, собираю сцены с контролем плотности текстур и производительности.</p>
-                <p>Ориентирован на работу в игровой индустрии <span class="highlight">(mobile / PC)</span>, открыт к задачам в 3D, окружении и визуальных креативах.</p>
-            </div>
-        </div>
+  <div class="container">
+    <div class="section-header reveal">
+      <div><span class="section-label">// Обо мне</span><h2>Junior 3D Artist<br>с фокусом на game-ready пайплайн</h2></div>
     </div>
+    <div class="about-grid">
+      <div class="about-image reveal"><img src="3Gemini_Generated_Image_6smcmb6smcmb6smc.png" alt="Сергей Войчук" loading="lazy" decoding="async"></div>
+      <div class="about-content reveal">
+        <h3>Привет, я Сергей</h3>
+        <p>Я <span class="highlight">3D Generalist</span> из Краснодара. Создаю game-ready 3D ассеты и окружение для real-time проектов (Unity). Понимаю разницу между <span class="highlight">high-poly для рендера</span> и <span class="highlight">low-poly для real-time</span>.</p>
+        <p>Работаю с <span class="highlight">hard surface и environment</span>: от моделирования до подготовки под движок (UV, LOD, оптимизация). Учитываю требования к <span class="highlight">топологии</span> для анимации и деформаций, собираю сцены с контролем плотности текстур и производительности.</p>
+        <p>Ориентирован на работу в игровой индустрии <span class="highlight">(mobile / PC)</span>, открыт к задачам в 3D, окружении и визуальных креативах.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section id="skills" style="background: var(--surface-solid);">
-    <div class="container">
-        <div class="section-header reveal">
-            <div>
-                <span class="section-label">// Технический стек</span>
-                <h2>Инструменты и Pipeline</h2>
-            </div>
-        </div>
-        <div class="skills-grid">
-            <div class="skill-card reveal">
-                <div class="skill-header">
-                    <div class="skill-name">3D Modeling</div>
-                    <div class="skill-level">Intermediate+</div>
-                </div>
-                <div class="skill-desc">Hard Surface моделирование техники, оружия, архитектуры. Boolean workflow, non-destructive подход, чистая топология.</div>
-                <div class="skill-tools"><span>Blender</span><span>HardOps</span><span>BoxCutter</span><span>Mesh Machine</span></div>
-            </div>
-            <div class="skill-card reveal">
-                <div class="skill-header">
-                    <div class="skill-name">Texturing</div>
-                    <div class="skill-level">Intermediate</div>
-                </div>
-                <div class="skill-desc">PBR текстуры с историей: ржавчина в швах, потёртости на ручках, пыль с дороги. Smart materials, generators, hand-paint детали.</div>
-                <div class="skill-tools"><span>Substance Painter</span><span>Substance Designer</span><span>Photoshop</span></div>
-            </div>
-            <div class="skill-card reveal">
-                <div class="skill-header">
-                    <div class="skill-name">Game Engines</div>
-                    <div class="skill-level">Junior / Intermediate</div>
-                </div>
-                <div class="skill-desc">Интеграция ассетов, настройка материалов, lighting, occlusion culling, batching, prefab variants.</div>
-                <div class="skill-tools"><span>Unity HDRP/URP</span><span>Prefab Workflow</span><span>Lighting</span></div>
-            </div>
-            <div class="skill-card reveal">
-                <div class="skill-header">
-                    <div class="skill-name">Optimization</div>
-                    <div class="skill-level">Basic / Intermediate</div>
-                </div>
-                <div class="skill-desc">Оптимизация под консоли и мобайл. LOD chains, texture atlasing, normal map baking, draw call reduction.</div>
-                <div class="skill-tools"><span>LOD Groups</span><span>Texel Density</span><span>Profiler</span></div>
-            </div>
-        </div>
+<section id="skills" style="background:var(--surface-solid)">
+  <div class="container">
+    <div class="section-header reveal">
+      <div><span class="section-label">// Технический стек</span><h2>Инструменты и Pipeline</h2></div>
     </div>
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <div class="skill-header"><div class="skill-name">3D Modeling</div><div class="skill-level">Intermediate+</div></div>
+        <div class="skill-desc">Hard Surface моделирование техники, оружия, архитектуры. Boolean workflow, non-destructive подход, чистая топология.</div>
+        <div class="skill-tools"><span>Blender</span><span>HardOps</span><span>BoxCutter</span><span>Mesh Machine</span></div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-header"><div class="skill-name">Texturing</div><div class="skill-level">Intermediate</div></div>
+        <div class="skill-desc">PBR текстуры с историей: ржавчина в швах, потёртости на ручках, пыль с дороги. Smart materials, generators, hand-paint детали.</div>
+        <div class="skill-tools"><span>Substance Painter</span><span>Substance Designer</span><span>Photoshop</span></div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-header"><div class="skill-name">Game Engines</div><div class="skill-level">Junior / Intermediate</div></div>
+        <div class="skill-desc">Интеграция ассетов, настройка материалов, lighting, occlusion culling, batching, prefab variants.</div>
+        <div class="skill-tools"><span>Unity HDRP/URP</span><span>Prefab Workflow</span><span>Lighting</span></div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-header"><div class="skill-name">Optimization</div><div class="skill-level">Basic / Intermediate</div></div>
+        <div class="skill-desc">Оптимизация под консоли и мобайл. LOD chains, texture atlasing, normal map baking, draw call reduction.</div>
+        <div class="skill-tools"><span>LOD Groups</span><span>Texel Density</span><span>Profiler</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section id="works">
-    <div class="container">
-        <div class="section-header reveal">
-            <div>
-                <span class="section-label">// Портфолио</span>
-                <h2>Selected Works<br>Full Cycle Production</h2>
-            </div>
-        </div>
-
-        <div class="works-grid">
-
-            <!-- Work 1: Car -->
-            <div class="work-card reveal" onclick="openModal('car')">
-                <div class="work-image">
-                    <img src="1.png" alt="Car Rendered" class="rendered">
-                    <img src="1.1.png" alt="Car Wireframe" class="wireframe">
-                    <div class="work-overlay">
-                        <span class="tech-tag">Subdivision Modeling</span>
-                        <span class="tech-tag">Clean Topology</span>
-                        <span class="tech-tag">Procedural Shading</span>
-                    </div>
-                </div>
-                <div class="work-content">
-                    <div class="work-category">Hard Surface / Vehicle</div>
-                    <h3 class="work-title">Chevrolet Corvette</h3>
-                    <p class="work-desc">Практическая работа по hard surface modeling. Цель — отработать чистую subdivision-топологию и качественное отражение света на сложных поверхностях автомобиля.</p>
-                    <div class="work-meta-list">
-                        <div>Высокополигональная модель (subdivision workflow)</div>
-                        <div>Чистая quad-топология с грамотным edge flow</div>
-                        <div>Subdivision Surface + Shrinkwrap modifiers</div>
-                        <div>Procedural node-based shading в Blender</div>
-                    </div>
-                    <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
-                </div>
-            </div>
-
-            <!-- Work 2: Mech -->
-            <div class="work-card reveal" onclick="openModal('mech')">
-                <div class="work-image">
-                    <img src="meh_2k.png" alt="Combat Mech" class="single">
-                    <div class="work-overlay">
-                        <span class="tech-tag">38K TRIS</span>
-                        <span class="tech-tag">MODULAR</span>
-                        <span class="tech-tag">2K ATLAS</span>
-                    </div>
-                </div>
-                <div class="work-content">
-                    <div class="work-category">Hard Surface / Character Mech</div>
-                    <h3 class="work-title">Combat Mech MK-VII</h3>
-                    <p class="work-desc">Боевой мех для sci-fi шутера. Модульная конструкция: 5 swap-зон для вариаций без пересборки. Vertex color wear masks для уникальных повреждений.</p>
-                    <div class="work-meta-list">
-                        <div>Отдельные элементы оружия и корпуса подготовлены как независимые меши</div>
-                        <div>Vertex paint damage layers</div>
-                        <div>2K shared texture atlas</div>
-                        <div>Hard surface boolean workflow</div>
-                    </div>
-                    <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
-                </div>
-            </div>
-
-            <!-- Work 3: Barrels -->
-            <div class="work-card reveal" onclick="openModal('barrels')">
-                <div class="work-image">
-                    <img src="Barrel_1.png" alt="Industrial Props" class="single">
-                    <div class="work-overlay">
-                        <span class="tech-tag">MODULAR</span>
-                        <span class="tech-tag">2K ATLAS</span>
-                        <span class="tech-tag">VERTEX PAINT</span>
-                    </div>
-                </div>
-                <div class="work-content">
-                    <div class="work-category">Props / Environment</div>
-                    <h3 class="work-title">Industrial Hazmat Set</h3>
-                    <p class="work-desc">Набор CGI пропсов (бочки) для индустриальных сцен. Созданы в Blender, 3 варианта ассетов объединены в один texture atlas для оптимизации. Материалы настроены через node-based шейдинг. Для вариативности инстансов использованы vertex color masks (грязь, износ, цветовые отличия). Оптимизировано под инстансинг и real-time рендер.</p>
-                    <div class="work-meta-list">
-                        <div>3 варианта: зеленый, красный, желтый</div>
-                        <div>Вариации реализованы через процедурную генерацию текстур в блендер</div>
-                        <div>Optimized для background dressing</div>
-                        <div>Износ, вызванный процедурной генерацией через нодовую систему в Блендр</div>
-                    </div>
-                    <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
-                </div>
-            </div>
-
-            <!-- Work 4: Japanese Environment -->
-            <div class="work-card reveal" onclick="openModal('japan')">
-                <div class="work-image">
-                    <img src="japan_1.png" alt="Japanese Street" class="single">
-                    <div class="work-overlay">
-                        <span class="tech-tag">MODULAR KIT</span>
-                        <span class="tech-tag">EMISSIVE</span>
-                        <span class="tech-tag">JAPAN</span>
-                    </div>
-                </div>
-                <div class="work-content">
-                    <div class="work-category">Environment / Urban Scene</div>
-                    <h3 class="work-title">ばらのにわ — Japan Street</h3>
-                    <p class="work-desc">Японская уличная среда. Модульный кит зданий, prop library из 20+ уникальных объектов, emissive неон и атмосферное освещение.</p>
-                    <div class="work-meta-list">
-                        <div>Модульная архитектура зданий</div>
-                        <div>20+ уникальных prop-объектов</div>
-                        <div>Emissive neон & ambient glow</div>
-                        <div>Bird eye + street level рендеры</div>
-                    </div>
-                    <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
-                </div>
-            </div>
-
-            <!-- Work 5: Environment Diorama -->
-            <div class="work-card reveal" onclick="openModal('env')">
-                <div class="work-image">
-                    <img src="Home2.png" alt="Environment" class="single">
-                    <div class="work-overlay">
-                        <span class="tech-tag">UNITY URP</span>
-                        <span class="tech-tag">SCENE ASSEMBLY</span>
-                        <span class="tech-tag">LIGHTING</span>
-                    </div>
-                </div>
-                <div class="work-content">
-                    <div class="work-category">Environment / Scene</div>
-                    <h3 class="work-title">Watermill Diorama</h3>
-                    <p class="work-desc">Полная сборка сцены в Unity URP. Кастомные шейдеры для воды и травы, mixed lighting, пост-обработка. 60 FPS на мобильных устройствах.</p>
-                    <div class="work-meta-list">
-                        <div>Custom water shader с refraction</div>
-                        <div>Grass rendering с wind animation</div>
-                        <div>Baked lighting для статики</div>
-                        <div>LOD cross-fading</div>
-                    </div>
-                    <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Additional Gallery -->
-        <div class="section-header reveal" style="margin-top: 6rem;">
-            <div>
-                <span class="section-label">// Детали</span>
-                <h2>Additional Renders</h2>
-            </div>
-        </div>
-
-        <div class="gallery-grid">
-            <div class="gallery-item reveal" onclick="openModal('barrels')">
-                <img src="Barrel_2.png" alt="Barrel Detail">
-                <div class="gallery-overlay"><div class="gallery-title">PBR Textures</div><div class="gallery-desc">Close-up ржавчины и decal</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('barrels')">
-                <img src="Barrel_3.png" alt="Barrel Top">
-                <div class="gallery-overlay"><div class="gallery-title">Topology Detail</div><div class="gallery-desc">Верхняя часть бочки</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('mech')">
-                <img src="meh_2k.png" alt="Mech">
-                <div class="gallery-overlay"><div class="gallery-title">Combat Mech</div><div class="gallery-desc">Hard Surface практика</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('env')">
-                <img src="Home1.png" alt="Prop">
-                <div class="gallery-overlay"><div class="gallery-title">Prop Detail</div><div class="gallery-desc">Сундук с фурнитурой</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('env')">
-                <img src="Home3.png" alt="Bridge">
-                <div class="gallery-overlay"><div class="gallery-title">Environment Detail</div><div class="gallery-desc">Деревянный мост</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('env')">
-                <img src="Home4.png" alt="House">
-                <div class="gallery-overlay"><div class="gallery-title">Architecture</div><div class="gallery-desc">Крыша и водяная мельница</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('barrels')">
-                <img src="Barrel_4.png" alt="Texture">
-                <div class="gallery-overlay"><div class="gallery-title">Material Work</div><div class="gallery-desc">Детали материалов</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('barrels')">
-                <img src="Barrel_5.png" alt="Barrel Lid">
-                <div class="gallery-overlay"><div class="gallery-title">Props</div><div class="gallery-desc">Крышка бочки</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('car')">
-                <img src="сетка2.png" alt="Wireframe">
-                <div class="gallery-overlay"><div class="gallery-title">Wireframe</div><div class="gallery-desc">Топология спереди</div></div>
-            </div>
-            <div class="gallery-item reveal" onclick="openModal('visual_since')">
-                <img src="simple_scene.png" alt="Visualization">
-                <div class="gallery-overlay"><div class="gallery-title">Визуализация</div><div class="gallery-desc">Сцена с графиком</div></div>
-            </div>
-            <!-- Video Card 1 — Mech Demo -->
-<div class="gallery-item reveal" onclick="openVideoModal('simple_scene_animate.mp4', 'simple_scene.png', 'simple_scene_animate')">
-    <div style="position: relative; height: 100%; background: #000;">
-        <img src="simple_scene.png" alt="Mech Video" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
-        <div class="gallery-overlay" style="background: linear-gradient(to top, rgba(5,5,5,0.95), rgba(255,61,0,0.45)); display: flex; align-items: center; justify-content: center; flex-direction: column;">
-            <div style="font-size: 4.5rem; color: #fff; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(255,61,0,0.6));">▶</div>
-            <div class="gallery-title" style="color: white; text-align: center; font-size: 1.25rem;">Визуализация</div>
-            <div class="gallery-desc" style="color: rgba(255,255,255,0.9);">Сцена с графиком</div>
-        </div>
-        <div style="position: absolute; top: 16px; right: 16px; background: var(--accent); color: white; font-size: 0.7rem; padding: 4px 10px; border-radius: 9999px; font-family: 'JetBrains Mono'; letter-spacing: 0.5px;">VIDEO</div>
+  <div class="container">
+    <div class="section-header reveal">
+      <div><span class="section-label">// Портфолио</span><h2>Selected Works<br>Full Cycle Production</h2></div>
     </div>
-</div>
-            <div class="gallery-item reveal" onclick="openModal('visual_since')">
-                <img src="Geonods.png" alt="Abstraction">
-                <div class="gallery-overlay"><div class="gallery-title">Абстракция</div><div class="gallery-desc">Геоноды</div></div>
-            </div>
+    <div class="works-grid">
+
+      <div class="work-card reveal" onclick="openModal('car')">
+        <div class="work-image">
+          <img src="1.png" alt="Corvette Rendered" class="rendered" loading="lazy" decoding="async">
+          <img src="1.1.png" alt="Corvette Wireframe" class="wireframe" loading="lazy" decoding="async">
+          <!--
+            ДОБАВЬ ВИДЕО-ПРЕВЬЮ НА КАРТОЧКУ:
+            <video class="card-video" src="car_preview.mp4" muted loop playsinline preload="none"></video>
+          -->
+          <div class="work-video-badge" id="car-badge" style="display:none">VIDEO</div>
+          <div class="work-overlay"><span class="tech-tag">Subdivision Modeling</span><span class="tech-tag">Clean Topology</span><span class="tech-tag">Procedural Shading</span></div>
         </div>
+        <div class="work-content">
+          <div class="work-category">Hard Surface / Vehicle</div>
+          <h3 class="work-title">Chevrolet Corvette</h3>
+          <p class="work-desc">Практическая работа по hard surface modeling. Цель — отработать чистую subdivision-топологию и качественное отражение света на сложных поверхностях автомобиля.</p>
+          <div class="work-meta-list">
+            <div>Высокополигональная модель (subdivision workflow)</div>
+            <div>Чистая quad-топология с грамотным edge flow</div>
+            <div>Subdivision Surface + Shrinkwrap modifiers</div>
+            <div>Procedural node-based shading в Blender</div>
+          </div>
+          <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
+        </div>
+      </div>
+
+      <div class="work-card reveal" onclick="openModal('mech')">
+        <div class="work-image">
+          <img src="meh_2k.png" alt="Combat Mech" class="single" loading="lazy" decoding="async">
+          <div class="work-video-badge" id="mech-badge" style="display:none">VIDEO</div>
+          <div class="work-overlay"><span class="tech-tag">38K TRIS</span><span class="tech-tag">MODULAR</span><span class="tech-tag">2K ATLAS</span></div>
+        </div>
+        <div class="work-content">
+          <div class="work-category">Hard Surface / Character Mech</div>
+          <h3 class="work-title">Combat Mech MK-VII</h3>
+          <p class="work-desc">Боевой мех для sci-fi шутера. Конструкция разбита на отдельные элементы. Vertex color wear masks для уникальных повреждений.</p>
+          <div class="work-meta-list">
+            <div>Отдельные элементы оружия и корпуса подготовлены как независимые меши</div>
+            <div>Vertex paint damage layers</div>
+            <div>2K shared texture atlas</div>
+            <div>Hard surface boolean workflow</div>
+          </div>
+          <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
+        </div>
+      </div>
+
+      <div class="work-card reveal" onclick="openModal('barrels')">
+        <div class="work-image">
+          <img src="Barrel_1.png" alt="Industrial Props" class="single" loading="lazy" decoding="async">
+          <div class="work-video-badge" id="barrels-badge" style="display:none">VIDEO</div>
+          <div class="work-overlay"><span class="tech-tag">MODULAR</span><span class="tech-tag">2K ATLAS</span><span class="tech-tag">VERTEX PAINT</span></div>
+        </div>
+        <div class="work-content">
+          <div class="work-category">Props / Environment</div>
+          <h3 class="work-title">Industrial Hazmat Set</h3>
+          <p class="work-desc">Набор CGI пропсов для индустриальных сцен. 3 варианта на одном texture atlas. Vertex color masks для вариативности инстансов.</p>
+          <div class="work-meta-list">
+            <div>3 варианта: зеленый, красный, желтый</div>
+            <div>Вариации через процедурную генерацию текстур в Blender</div>
+            <div>Optimized для background dressing</div>
+            <div>Износ через процедурную нодовую систему</div>
+          </div>
+          <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
+        </div>
+      </div>
+
+      <div class="work-card reveal" onclick="openModal('japan')">
+        <div class="work-image">
+          <img src="japan_1.png" alt="Japanese Street" class="single" loading="lazy" decoding="async">
+          <div class="work-video-badge" id="japan-badge" style="display:none">VIDEO</div>
+          <div class="work-overlay"><span class="tech-tag">MODULAR KIT</span><span class="tech-tag">EMISSIVE</span><span class="tech-tag">JAPAN</span></div>
+        </div>
+        <div class="work-content">
+          <div class="work-category">Environment / Urban Scene</div>
+          <h3 class="work-title">ばらのにわ — Japan Street</h3>
+          <p class="work-desc">Японская уличная среда. Модульный кит зданий, prop library из 20+ уникальных объектов, emissive неон и атмосферное освещение.</p>
+          <div class="work-meta-list">
+            <div>Модульная архитектура зданий</div>
+            <div>20+ уникальных prop-объектов</div>
+            <div>Emissive неон & ambient glow</div>
+            <div>Bird eye + street level рендеры</div>
+          </div>
+          <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
+        </div>
+      </div>
+
+      <div class="work-card reveal" onclick="openModal('env')">
+        <div class="work-image">
+          <img src="Home2.png" alt="Environment" class="single" loading="lazy" decoding="async">
+          <div class="work-video-badge" id="env-badge" style="display:none">VIDEO</div>
+          <div class="work-overlay"><span class="tech-tag">UNITY URP</span><span class="tech-tag">SCENE ASSEMBLY</span><span class="tech-tag">LIGHTING</span></div>
+        </div>
+        <div class="work-content">
+          <div class="work-category">Environment / Scene</div>
+          <h3 class="work-title">Watermill Diorama</h3>
+          <p class="work-desc">Полная сборка сцены в Unity URP. Кастомные шейдеры для воды и травы, mixed lighting, пост-обработка. 60 FPS на мобильных устройствах.</p>
+          <div class="work-meta-list">
+            <div>Custom water shader с refraction</div>
+            <div>Grass rendering с wind animation</div>
+            <div>Baked lighting для статики</div>
+            <div>LOD cross-fading</div>
+          </div>
+          <span class="view-project-btn">Открыть проект <span class="arrow">→</span></span>
+        </div>
+      </div>
+
     </div>
+
+    <div class="section-header reveal" style="margin-top:6rem">
+      <div><span class="section-label">// Детали</span><h2>Additional Renders</h2></div>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item reveal" onclick="openModal('barrels')"><img src="Barrel_2.png" alt="Barrel Detail" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">PBR Textures</div><div class="gallery-desc">Close-up ржавчины и decal</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('barrels')"><img src="Barrel_3.png" alt="Barrel Top" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Topology Detail</div><div class="gallery-desc">Верхняя часть бочки</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('mech')"><img src="meh_2k.png" alt="Mech" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Combat Mech</div><div class="gallery-desc">Hard Surface практика</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('env')"><img src="Home1.png" alt="Prop" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Prop Detail</div><div class="gallery-desc">Сундук с фурнитурой</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('env')"><img src="Home3.png" alt="Bridge" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Environment Detail</div><div class="gallery-desc">Деревянный мост</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('env')"><img src="Home4.png" alt="House" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Architecture</div><div class="gallery-desc">Крыша и водяная мельница</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('barrels')"><img src="Barrel_4.png" alt="Texture" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Material Work</div><div class="gallery-desc">Детали материалов</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('barrels')"><img src="Barrel_5.png" alt="Barrel Lid" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Props</div><div class="gallery-desc">Крышка бочки</div></div></div>
+      <div class="gallery-item reveal" onclick="openModal('car')"><img src="сетка2.png" alt="Wireframe" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Wireframe</div><div class="gallery-desc">Топология спереди</div></div></div>
+      <div class="gallery-item reveal"><img src="simple_scene.png" alt="Visualization" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Визуализация</div><div class="gallery-desc">Сцена с графиком</div></div></div>
+      <!-- Video gallery card -->
+      <div class="gallery-item reveal" onclick="openVid()" style="background:#000;cursor:pointer">
+        <img src="simple_scene.png" alt="Video preview" loading="lazy" decoding="async" style="opacity:.7">
+        <div class="gallery-overlay" style="opacity:1;background:linear-gradient(to top,rgba(5,5,5,.95),rgba(255,61,0,.3));display:flex;align-items:center;justify-content:center;flex-direction:column">
+          <div style="font-size:3.5rem;margin-bottom:.5rem;filter:drop-shadow(0 0 16px rgba(255,61,0,.7))">▶</div>
+          <div class="gallery-title" style="text-align:center">Визуализация</div>
+          <div class="gallery-desc">Сцена с анимацией</div>
+        </div>
+        <div style="position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;font-size:.65rem;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono';letter-spacing:.5px;font-weight:700">VIDEO</div>
+      </div>
+      <div class="gallery-item reveal"><img src="Geonods.png" alt="Geonodes" loading="lazy" decoding="async"><div class="gallery-overlay"><div class="gallery-title">Абстракция</div><div class="gallery-desc">Геоноды</div></div></div>
+    </div>
+  </div>
 </section>
 
 <section class="carx-section">
-    <div class="container">
-        <div class="carx-content reveal">
-            <span class="section-label">// Для Потенциального работодателя</span>
-            <h2>Готов к <span>Test Task</span></h2>
-            <p>Открыт для тестовых заданий. Могу быстро выполнить задачу от простого <span style="color: var(--text); font-weight: 600;">пропса</span> до сложной сцены с качественным моделированием, топологией и shading’ом.</p>
-            <p>Ищу долгосрочную работу в студии, где ценят чистый hard surface, быструю работу и технически грамотный подход.</p>
-            <div class="cta-group" style="margin-top: 2rem;">
-                <a href="mailto:vojchuk1997@gmail.com" class="btn btn-primary">Отправить тестовое</a>
-                <a href="https://krasnodar.hh.ru/resume/840f9beeff0eb9d48e0039ed1f427061646b50" target="_blank" class="btn btn-secondary">Резюме на HH</a>
-            </div>
-        </div>
+  <div class="container">
+    <div class="carx-content reveal">
+      <span class="section-label">// Для Потенциального работодателя</span>
+      <h2>Готов к <span>Test Task</span></h2>
+      <p>Открыт для тестовых заданий. Могу быстро выполнить задачу от простого <span style="color:var(--text);font-weight:600">пропса</span> до сложной сцены с качественным моделированием, топологией и shading'ом.</p>
+      <p>Ищу долгосрочную работу в студии, где ценят чистый hard surface, быструю работу и технически грамотный подход.</p>
+      <div class="cta-group" style="margin-top:2rem">
+        <a href="mailto:vojchuk1997@gmail.com" class="btn btn-primary">Отправить тестовое</a>
+        <a href="https://krasnodar.hh.ru/resume/840f9beeff0eb9d48e0039ed1f427061646b50" target="_blank" rel="noopener" class="btn btn-secondary">Резюме на HH</a>
+      </div>
     </div>
+  </div>
 </section>
 
 <section id="contact">
-    <div class="container">
-        <div class="section-header reveal">
-            <div>
-                <span class="section-label">// Контакт</span>
-                <h2>Давайте работать<br>вместе</h2>
-            </div>
-        </div>
-        <div class="contact-grid">
-            <a href="mailto:vojchuk1997@gmail.com" class="contact-card reveal">
-                <div class="contact-label">Email</div>
-                <div class="contact-value">vojchuk1997@gmail.com</div>
-            </a>
-            <a href="https://t.me/Ghost_LT42" class="contact-card reveal">
-                <div class="contact-label">Telegram</div>
-                <div class="contact-value">@Ghost_LT42</div>
-            </a>
-            <div class="contact-card reveal">
-                <div class="contact-label">Location</div>
-                <div class="contact-value">Краснодар, РФ</div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="section-header reveal">
+      <div><span class="section-label">// Контакт</span><h2>Давайте работать<br>вместе</h2></div>
     </div>
+    <div class="contact-grid">
+      <a href="mailto:vojchuk1997@gmail.com" class="contact-card reveal"><div class="contact-label">Email</div><div class="contact-value">vojchuk1997@gmail.com</div></a>
+      <a href="https://t.me/Ghost_LT42" class="contact-card reveal"><div class="contact-label">Telegram</div><div class="contact-value">@Ghost_LT42</div></a>
+      <div class="contact-card reveal"><div class="contact-label">Location</div><div class="contact-value">Краснодар, РФ</div></div>
+    </div>
+  </div>
 </section>
 
 <footer>
-    <div class="container">
-        <p>© 2025 Сергей Войчук — 3D Generalist &nbsp;·&nbsp; Made with ❤️ for game dev</p>
-    </div>
+  <div class="container"><p>© 2025 Сергей Войчук — 3D Generalist &nbsp;·&nbsp; Made with ❤️ for game dev</p></div>
 </footer>
 
-<!-- ══════════════ SCRIPTS ══════════════ -->
 <script>
-// ─── Cursor Glow ───
-const glow = document.getElementById('cursorGlow');
-document.addEventListener('mousemove', e => {
-    glow.style.left = e.clientX + 'px';
-    glow.style.top  = e.clientY + 'px';
-});
+'use strict';
 
-// ─── Scroll Reveal ───
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-}, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// ─── Modal data: images per project ───
-const projectImages = {
-    car:     ['1.png','1.1.png','2.png','3.png','4.png','5.png','сетка2.png'],
-    mech:    ['meh_2k.png','meh_1.png','meh_2.png','meh_3.png','meh_4.png'],
-    barrels: ['Barrel_1.png','Barrel_2.png','Barrel_3.png','Barrel_4.png','Barrel_5.png','Barrel_6.png'],
-    env:     ['Home2.png','Home1.png','Home3.png','Home4.png'],
-    japan:   ['japan_1.png','japan_2.png','japan_3.png']
+/* ═══════════════════════════════════════════════════════
+   MEDIA DATA — добавь свои видео сюда!
+   Формат: {type:'video', src:'filename.mp4', poster:'preview.png'}
+   Просто раскомментируй нужную строку или добавь новую.
+═══════════════════════════════════════════════════════ */
+const MEDIA = {
+  car: [
+    {t:'i', s:'1.png'},
+    {t:'i', s:'1.1.png'},
+    {t:'i', s:'2.png'},
+    {t:'i', s:'3.png'},
+    {t:'i', s:'4.png'},
+    {t:'i', s:'5.png'},
+    {t:'i', s:'сетка2.png'},
+    // {t:'v', s:'car_turntable.mp4', p:'1.png'},   ← раскомментируй когда добавишь видео
+  ],
+  mech: [
+    {t:'i', s:'meh_2k.png'},
+    {t:'i', s:'meh_1.png'},
+    {t:'i', s:'meh_2.png'},
+    {t:'i', s:'meh_3.png'},
+    {t:'i', s:'meh_4.png'},
+    // {t:'v', s:'mech_demo.mp4', p:'meh_2k.png'},
+  ],
+  barrels: [
+    {t:'i', s:'Barrel_1.png'},
+    {t:'i', s:'Barrel_2.png'},
+    {t:'i', s:'Barrel_3.png'},
+    {t:'i', s:'Barrel_4.png'},
+    {t:'i', s:'Barrel_5.png'},
+    {t:'i', s:'Barrel_6.png'},
+    // {t:'v', s:'barrels_demo.mp4', p:'Barrel_1.png'},
+  ],
+  japan: [
+    {t:'i', s:'japan_1.png'},
+    {t:'i', s:'japan_2.png'},
+    {t:'i', s:'japan_3.png'},
+    // {t:'v', s:'japan_demo.mp4', p:'japan_1.png'},
+  ],
+  env: [
+    {t:'i', s:'Home2.png'},
+    {t:'i', s:'Home1.png'},
+    {t:'i', s:'Home3.png'},
+    {t:'i', s:'Home4.png'},
+    // {t:'v', s:'env_demo.mp4', p:'Home2.png'},
+  ]
 };
-const currentIdx = { car: 0, mech: 0, barrels: 0, env: 0, japan: 0 };
+
+const ST = {}; // state per project: {idx, items, vids}
+
+/* ── Build modal media from data ── */
+function build() {
+  for (const [id, items] of Object.entries(MEDIA)) {
+    const area   = document.getElementById(id + '-area');
+    const thumbs = document.getElementById(id + '-thumbs');
+    const badge  = document.getElementById(id + '-badge');
+    if (!area || !thumbs) continue;
+
+    ST[id] = {idx: 0, items, vids: {}};
+
+    const hasVid = items.some(m => m.t === 'v');
+    if (badge) badge.style.display = hasVid ? 'flex' : 'none';
+
+    items.forEach((m, i) => {
+      /* Media item */
+      const wrap = document.createElement('div');
+      wrap.className = 'modal-media-item' + (i === 0 ? ' active' : '');
+
+      if (m.t === 'v') {
+        const v = document.createElement('video');
+        v.src = m.s;
+        if (m.p) v.poster = m.p;
+        v.controls = true; v.loop = true; v.playsInline = true; v.preload = 'none';
+        wrap.appendChild(v);
+        ST[id].vids[i] = v;
+      } else {
+        const img = document.createElement('img');
+        img.src = m.s; img.alt = ''; img.loading = i < 2 ? 'eager' : 'lazy'; img.decoding = 'async';
+        wrap.appendChild(img);
+      }
+      area.appendChild(wrap);
+
+      /* Thumbnail */
+      const th = document.createElement('div');
+      th.className = 'modal-thumb' + (i === 0 ? ' active' : '') + (m.t === 'v' ? ' is-video' : '');
+      th.onclick = () => go(id, i);
+      const tImg = document.createElement('img');
+      tImg.src = m.t === 'v' ? (m.p || '') : m.s;
+      tImg.alt = ''; tImg.loading = 'lazy';
+      if (tImg.src) th.appendChild(tImg);
+      thumbs.appendChild(th);
+    });
+  }
+}
+
+function go(id, idx) {
+  const s = ST[id]; if (!s) return;
+  const n = ((idx % s.items.length) + s.items.length) % s.items.length;
+
+  // Pause prev video
+  const pv = s.vids[s.idx]; if (pv) { pv.pause(); pv.currentTime = 0; }
+  s.idx = n;
+
+  const area   = document.getElementById(id + '-area');
+  const count  = document.getElementById(id + '-count');
+  const thumbs = document.getElementById(id + '-thumbs');
+
+  // Toggle media items
+  area.querySelectorAll('.modal-media-item').forEach((el, i) => el.classList.toggle('active', i === n));
+
+  // Toggle video label
+  area.classList.toggle('is-video', s.items[n].t === 'v');
+
+  // Play new video
+  const nv = s.vids[n];
+  if (nv) { nv.preload = 'auto'; nv.play().catch(() => {}); }
+
+  // Counter
+  if (count) count.textContent = (n + 1) + ' / ' + s.items.length;
+
+  // Thumbs
+  thumbs.querySelectorAll('.modal-thumb').forEach((t, i) => t.classList.toggle('active', i === n));
+  thumbs.children[n]?.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+function changeMedia(id, d) { go(id, ST[id].idx + d); }
 
 function openModal(id) {
-    document.getElementById('modal-' + id).classList.add('open');
-    document.body.style.overflow = 'hidden';
-    setImg(id, 0);
+  document.getElementById('modal-' + id)?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  go(id, 0);
 }
 function closeModal(id) {
-    document.getElementById('modal-' + id).classList.remove('open');
-    document.body.style.overflow = '';
+  document.getElementById('modal-' + id)?.classList.remove('open');
+  document.body.style.overflow = '';
+  const s = ST[id];
+  if (s) Object.values(s.vids).forEach(v => { v.pause(); v.currentTime = 0; });
 }
 
-function setImg(id, idx) {
-    const imgs = projectImages[id];
-    const i = (idx + imgs.length) % imgs.length;
-    currentIdx[id] = i;
-    document.getElementById(id + '-main-img').src = imgs[i];
-    document.getElementById(id + '-count').textContent = (i+1) + ' / ' + imgs.length;
-    document.querySelectorAll('#' + id + '-thumbs .modal-thumb')
-        .forEach((t, ti) => t.classList.toggle('active', ti === i));
+/* Gallery video */
+function openVid() {
+  document.getElementById('modal-vid').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('vid-player').play().catch(() => {});
 }
-function changeImg(id, dir) {
-    setImg(id, currentIdx[id] + dir);
+function closeVid() {
+  document.getElementById('modal-vid').classList.remove('open');
+  document.body.style.overflow = '';
+  const p = document.getElementById('vid-player'); p.pause(); p.currentTime = 0;
 }
+document.getElementById('modal-vid').addEventListener('click', e => { if (e.target === e.currentTarget) closeVid(); });
 
-// Close on backdrop click
-document.querySelectorAll('.modal-backdrop').forEach(bd => {
-    bd.addEventListener('click', e => {
-        if (e.target === bd) closeModal(bd.id.replace('modal-', ''));
-    });
+/* Close on backdrop click + keyboard */
+document.querySelectorAll('.modal-backdrop:not(#modal-vid)').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) closeModal(bd.id.slice(6)); }, {passive:true});
 });
-
-// Close on Escape
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-backdrop.open').forEach(bd => {
-            bd.classList.remove('open');
-        });
-        document.body.style.overflow = '';
-    }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop.open').forEach(bd => {
+      const id = bd.id.slice(6); id === 'vid' ? closeVid() : closeModal(id);
+    });
+  }
+  const open = document.querySelector('.modal-backdrop.open:not(#modal-vid)');
+  if (!open) return;
+  const id = open.id.slice(6);
+  if (e.key === 'ArrowLeft')  changeMedia(id, -1);
+  if (e.key === 'ArrowRight') changeMedia(id,  1);
 });
 
-// Arrow keys for active modal
-document.addEventListener('keydown', e => {
-    const open = document.querySelector('.modal-backdrop.open');
-    if (!open) return;
-    const id = open.id.replace('modal-', '');
-    if (e.key === 'ArrowLeft')  changeImg(id, -1);
-    if (e.key === 'ArrowRight') changeImg(id,  1);
+/* Card hover video (lazy) */
+document.querySelectorAll('.work-card').forEach(card => {
+  const v = card.querySelector('video.card-video'); if (!v) return;
+  let t;
+  card.addEventListener('mouseenter', () => { clearTimeout(t); v.preload = 'auto'; t = setTimeout(() => v.play().catch(() => {}), 150); }, {passive:true});
+  card.addEventListener('mouseleave', () => { clearTimeout(t); v.pause(); v.currentTime = 0; }, {passive:true});
 });
 
-// ─── Video Modal Functions ───
-function openVideoModal(videoSrc, posterSrc = '', title = 'Demo Video') {
-    const modal = document.getElementById('modal-video');
-    const video = document.getElementById('video-player');
-    const source = document.getElementById('video-source');
-    const titleEl = document.getElementById('video-title');
-
-    source.src = videoSrc;
-    video.poster = posterSrc;
-    titleEl.textContent = title;
-    video.load();
-
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
+/* Cursor glow — RAF smoothed, no layout thrash */
+const glowEl = document.getElementById('cursorGlow');
+let mx = -9999, my = -9999, gx = -9999, gy = -9999, rafOn = false;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  if (!rafOn) { rafOn = true; requestAnimationFrame(tick); }
+}, {passive:true});
+function tick() {
+  gx += (mx - gx) * .1; gy += (my - gy) * .1;
+  glowEl.style.transform = `translate3d(calc(${gx|0}px - 50%),calc(${gy|0}px - 50%),0)`;
+  rafOn = (Math.abs(mx-gx) > .5 || Math.abs(my-gy) > .5);
+  if (rafOn) requestAnimationFrame(tick);
 }
 
-function closeVideoModal() {
-    const modal = document.getElementById('modal-video');
-    const video = document.getElementById('video-player');
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    video.pause();
-    video.currentTime = 0;
-}
+/* Scroll reveal — unobserve after trigger (saves CPU) */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, {threshold:.1, rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-    // === Mech Media Carousel with Video Autoplay ===
-let currentMechIndex = 0;
-const totalMechMedia = 6; // 5 картинок + 1 видео
-
-function setMechMedia(index) {
-    currentMechIndex = (index + totalMechMedia) % totalMechMedia;
-    
-    // Скрываем всё
-    document.querySelectorAll('#mech-gallery .modal-media').forEach(el => {
-        el.classList.remove('active');
-        el.style.display = 'none';
-    });
-    
-    // Показываем нужное
-    if (currentMechIndex === 5) {
-        // Видео
-        const video = document.getElementById('mech-video');
-        video.style.display = 'block';
-        video.classList.add('active');
-        video.play();
-    } else {
-        // Картинка
-        const img = document.getElementById(currentMechIndex === 0 ? 'mech-main-img' : `mech-img${currentMechIndex}`);
-        img.style.display = 'block';
-        img.classList.add('active');
-        
-        // Останавливаем видео если оно было
-        document.getElementById('mech-video').pause();
-    }
-    
-    document.getElementById('mech-count').textContent = (currentMechIndex + 1) + ' / ' + totalMechMedia;
-    
-    // Активный thumbnail
-    document.querySelectorAll('#mech-thumbs .modal-thumb').forEach((t, i) => {
-        t.classList.toggle('active', i === currentMechIndex);
-    });
-}
-
-function changeMechMedia(dir) {
-    setMechMedia(currentMechIndex + dir);
-}
+/* Init */
+build();
 </script>
 </body>
 </html>
