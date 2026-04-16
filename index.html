@@ -1473,6 +1473,20 @@ document.querySelectorAll('.work-card').forEach(card => {
         cardVideoObserver.observe(card);
     }
 });
+
+// Проверяем что observer видит карточку мельницы
+document.querySelectorAll('.work-card').forEach((card, i) => {
+    const v = card.querySelector('[data-card-video]');
+    console.log(`Card ${i}:`, card.querySelector('.work-title')?.textContent, '| has video:', !!v);
+    if (v) console.log(`  video src: ${v.querySelector('source')?.src}, readyState: ${v.readyState}`);
+});
+
+// Пробуем принудительно запустить видео мельницы
+const v = document.querySelector('[data-card-video]');
+const v2 = document.querySelectorAll('[data-card-video]')[1];
+console.log('Mech video:', v);
+console.log('Watermill video:', v2);
+if (v2) { v2.style.opacity = '1'; v2.load(); v2.play().then(() => console.log('PLAYING')).catch(e => console.log('ERROR:', e)); }    
 </script>
 </body>
 </html>
