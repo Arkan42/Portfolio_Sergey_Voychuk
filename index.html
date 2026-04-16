@@ -609,7 +609,7 @@
                 
                 <img src="meh_2k.png" alt="Mech" id="mech-main-img" style="width:100%; height:100%; object-fit:cover;">
                 
-                <video data-video-slot loop muted playsinline 
+                <video id="mech-video" data-video-slot loop muted playsinline preload="auto"
                        style="width:100%; height:100%; object-fit:cover; display:none;">
                     <source src="mech_demo.mp4" type="video/mp4">
                 </video>
@@ -762,7 +762,7 @@
             <div class="modal-main-img" id="env-gallery" style="background:#000;">
                 <span class="modal-img-count" id="env-count">1 / 5</span>
                 <img src="Home2.png" alt="Environment" id="env-main-img" style="width:100%; height:100%; object-fit:cover;">
-                <video data-video-slot loop muted playsinline
+                <video id="env-video" data-video-slot loop muted playsinline preload="auto"
                        style="width:100%; height:100%; object-fit:cover; display:none;">
                     <source src="watermill_demo.mp4" type="video/mp4">
                 </video>
@@ -1157,7 +1157,7 @@
             <!-- Work 5: Environment Diorama -->
             <div class="work-card reveal" onclick="openModal('env')">
                 <div class="work-image">
-                    <img src="Home2.png" alt="Environment" class="single">
+                    <img src="Home2.png" alt="Environment" class="rendered">
                     <video data-card-video loop muted playsinline
                            style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.6s;pointer-events:none;">
                         <source src="watermill_demo.mp4" type="video/mp4">
@@ -1350,8 +1350,13 @@ function closeModal(id) {
     const modal = document.getElementById('modal-' + id);
     modal.classList.remove('open');
     document.body.style.overflow = '';
-    // Универсально останавливаем все видео внутри модалки
-    modal.querySelectorAll('video').forEach(v => { v.pause(); v.currentTime = 0; });
+    // Останавливаем видео, прячем его и восстанавливаем картинку
+    const videoEl = modal.querySelector('[data-video-slot]');
+    const mainImg = document.getElementById(id + '-main-img');
+    if (videoEl) { videoEl.pause(); videoEl.currentTime = 0; videoEl.style.display = 'none'; }
+    if (mainImg) mainImg.style.display = 'block';
+    // Сбрасываем индекс на первый слайд
+    setImg(id, 0);
 }
 
 function setImg(id, idx) {
@@ -1374,6 +1379,7 @@ function setImg(id, idx) {
         mainImg.style.display = isVideo ? 'none' : 'block';
         videoEl.style.display = isVideo ? 'block' : 'none';
         if (isVideo) {
+            videoEl.load();                   // принудительно начинаем загрузку
             videoEl.play().catch(() => {});
         } else {
             videoEl.pause();
